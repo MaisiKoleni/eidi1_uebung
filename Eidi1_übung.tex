@@ -1,0 +1,181 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+% This is a simple template for a LaTeX document using the "article" class.
+% See "book", "report", "letter" for other types of document.
+
+\documentclass[11pt]{article} % use larger type; default would be 10pt
+
+\usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
+
+%%% Examples of Article customizations
+% These packages are optional, depending whether you want the features they provide.
+% See the LaTeX Companion or other references for full information.
+
+%%% PAGE DIMENSIONS
+\usepackage{geometry} % to change the page dimensions
+\geometry{a4paper} % or letterpaper (US) or a5paper or....
+\geometry{margin=1in} % for example, change the margins to 2 inches all round
+% \geometry{landscape} % set up the page for landscape
+%   read geometry.pdf for detailed page layout information
+
+\usepackage{graphicx} % support the \includegraphics command and options
+
+\usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+
+%%% PACKAGES
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
+\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+% These packages are all incorporated in the memoir class to one degree or another...
+
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{color}
+
+%%% HEADERS & FOOTERS
+\usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
+\pagestyle{fancy} % options: empty , plain , fancy
+\renewcommand{\headrulewidth}{0pt} % customise the layout...
+\lhead{}\chead{}\rhead{}
+\lfoot{}\cfoot{\thepage}\rfoot{}
+
+%%% SECTION TITLE APPEARANCE
+\usepackage{sectsty}
+\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
+% (This matches ConTeXt defaults)
+
+%%% ToC (table of contents) APPEARANCE
+\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
+\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
+\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
+\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
+
+%%% END Article customizations
+
+%%% The "real" document content comes below...
+\title{Übungsaufgaben EIDI 1 \\ \small \color{magenta}Version 1.0.0}
+\author{Christian Femers}
+%\date{} % Activate to display a given date or no date (if empty),
+         % otherwise the current date is printed 
+
+
+\definecolor{jcom}{rgb}{0.5,0.3,0.3} 
+\definecolor{jnum}{rgb}{0.3,0.3,0.9}
+\definecolor{jstring}{rgb}{0.1,0.5,0.2}
+\definecolor{jkeyw}{rgb}{0.7,0,0.3}
+
+\lstdefinestyle{mystyle}{
+    commentstyle=\color{jcom},
+    keywordstyle=\color{jkeyw},
+    numberstyle=\tiny\color{jnum},
+    stringstyle=\color{jstring},
+    basicstyle=\ttfamily\small,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=8pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+	frame=single
+}
+\lstset{style=mystyle}
+
+\usepackage[german]{babel}
+\usepackage{csquotes}
+\usepackage[style=ieee]{biblatex}
+\addbibresource{eidi_ueb.bib}
+
+\begin{document}
+\maketitle
+\emph{Geschätzte Zeit:\newline 60–120 min mit IDE, 100–160 min auf Papier; je zusätzlich 80–180 min für Selectionsort}
+\section{Synchrone Rekursion}
+Wir wollen eine \emph{einfach verkettete Liste} für die Verwaltung von 2-Tupeln bzw. Objekt-paaren erstellen. Um sie für verschiedene Zwecke einsetzen zu können, soll sie parametriert werden, also Generics nutzen. Außerdem soll die Liste auch in nebenläufigen Programmen verwendet werden können und die Nutzung durch verschiedene Threads unterstützen, indem auf unnötige Synchronisation verzichtet wird. Leider haben bösartige Pinguine den Java-Compiler sabotiert, sodass dieser keine Schleifen mehr kompilieren kann, Sie müssen also ohne auskommen. Lösen Sie daher diese Aufgabe \textbf{rekursiv}; Sie dürfen \textbf{keinerlei Schleifen} verwenden.\par
+Um bestmögliche Parallelität zu erreichen, wollen wir für die Synchronisation\newline \texttt{java.util.concurrent.locks.ReentrantReadWriteLock} verwenden. Sie können die folgenden Methoden verwenden:
+\begin{itemize}
+\item \texttt{new ReentrantReadWriteLock()} erzeugt ein neues \texttt{ReentrantReadWriteLock}-Objekt.
+\item Mit \texttt{readLock().lock()} kann der ausführende Thread versuchen, das Lese-Lock zu akquirieren. Falls das Schreib-Lock \emph{von einem anderen Thread} besetzt ist, blockiert der Aufruf die Ausführung, bis das Schreib-Lock wieder frei ist. Der Thread kann dieses Lock auch mehrfach akquirieren.
+\item \texttt{readLock().unlock()} gibt das Lese-Lock wieder frei. Ein Thread muss \texttt{unlock()} genau so oft aufrufen, wie er \texttt{lock()} aufgerufen hat, um das Lock freizugeben. Besitzt ein Thread das Lock nicht (mehr), wird eine \texttt{IllegalMonitorStateException} geworfen.
+\item Mit \texttt{writeLock().lock()} kann der ausführende Thread versuchen, das Schreib-Lock zu akquirieren. Falls das Schreib-Lock \textbf{oder} das Lese-Lock noch \emph{von einem anderen Thread} besetzt ist, blockiert der Aufruf die Ausführung, bis das Schreib-Lock wieder frei ist. Der Thread kann dieses Lock auch mehrfach akquirieren.
+\item \texttt{writeLock().unlock()} verhält sich analog zu \texttt{readLock().unlock()}
+\end{itemize}
+Um einen möglichst großen Teil der Implementierung nach außen hin zu verstecken, sollen so wenig Methoden wie möglich öffentlich, d.h. \texttt{public} gemacht werden. Machen Sie daher nur Methoden öffentlich, wenn sie die Aufgabenstellung explizit dazu auffordert.
+
+\subsection{Die Klasse ListElement}
+Implementieren Sie zuerst die Klasse \texttt{ListElement}. Diese soll Element unserer verketteten Liste repräsentieren. Dafür benötigt Sie ein \texttt{ListElement}-Attribut, das auf das nächste Element zeigt, sowie zwei Attribute vom Typ der zwei Typ-Parameter \texttt{S} und \texttt{T}, die den in dem Element gespeicherten Inhalt repräsentieren. Stellen Sie für die Elementinhalte jeweils öffentliche Getter und Setter bereit. Achten Sie darauf, dass hier \emph{race-conditions} auftreten können; behandeln das Problem für jedes Objekt mit einem eigenen \texttt{ReentrantReadWriteLock}. Sorgen Sie dafür, das auf keines der Attribute unkontrolliert zugegriffen werden kann.\par
+Um von der Liste aus Schreibzugriffe auf den Elementen während umfassenderen Operationen verhindern zu können, muss die Liste mit den Locks der Elemente interagieren können. Stellen Sie daher \emph{nicht-öffentliche} Getter bereit, mit denen die Liste auf die \texttt{ReentrantReadWriteLock}s zugreifen kann. Die Methoden für das Lesen und Modifizieren des nächsten Listenelements sollen ebenfalls \emph{nicht-öffentlich} sein.\newline
+Stellen Sie einen (oder mehrere) nicht-öffentlichen Konstruktor zur Verfügung, sodass nur die Liste neue \texttt{ListElement}-Objekte erzeugen kann und überschreiben und implementieren Sie die Methode \texttt{java.lang.Object.equals(Object)} gemäß dem \texttt{equals()}-Kontrakt\cite[][S. 207]{Inden2015}:
+
+\blockquote{
+\textbf{Der \texttt{equals()}-Kontrakt}\par
+Vielfach benötigt man eine Prüfung auf inhaltliche Gleichheit. Dazu muss in eigenen
+Klassen die Methode \texttt{equals(Object)} passend überschrieben und dabei deren Kontrakt
+eingehalten werden. In der JLS [34] ist dazu folgende Signatur festgelegt:\par
+\leavevmode{\parindent=1em\indent} \texttt{public boolean equals(Object obj)}\par
+Diese Methode muss eine Äquivalenzrelation mit folgenden Eigenschaften realisieren:
+\begin{itemize}
+\item \textbf{Null-Akzeptanz} – Für jede Referenz \texttt{x} ungleich \texttt{null} liefert \texttt{x.equals(null)}
+den Wert \texttt{false}.
+\item \textbf{Reflexivität} – Für jede Referenz \texttt{x}, die nicht \texttt{null} ist, muss \texttt{x.equals(x)} den
+Wert \texttt{true} liefern.
+\item \textbf{Symmetrie} – Für alle Referenzen \texttt{x} und \texttt{y} darf \texttt{x.equals(y)} nur den Wert \texttt{true}
+ergeben, wenn \texttt{y.equals(x)} dies auch tut.
+\item \textbf{Transitivität} – Für alle Referenzen \texttt{x}, \texttt{y} und \texttt{z} gilt: Sofern \texttt{x.equals(y)} und
+\texttt{y.equals(z)} den Wert \texttt{true} ergeben, dann muss dies auch \texttt{x.equals(z)} tun.
+\item \textbf{Konsistenz} – Für alle Referenzen \texttt{x} und \texttt{y}, die nicht \texttt{null} sind, müssen mehrmalige
+Aufrufe von \texttt{x.equals(y)} konsistent den Wert \texttt{true} bzw. \texttt{false} liefern.
+\end{itemize}
+}
+
+Berücksichtigen Sie hierbei nur die Attribute, die für die ``inhaltliche Gleichheit'' wichtig sind.\par
+Schreiben Sie außerdem die Methoden
+\begin{itemize}
+\item \texttt{public final void updateVal1(UnaryOperator<S> operation)} und
+\item \texttt{public final void updateVal2(UnaryOperator<T> operation)}.
+\end{itemize}
+\texttt{UnaryOperator} ist ein parametriertes, funktionales Interface mit der abstrakten Methode \newline\texttt{T apply(T t)}, \texttt{T} ist hier der Typ-Parameter. Die \texttt{apply}-Methode von \texttt{operation} soll dabei als eine atomare bzw. synchronisierte Operation betrachtet werden. Der Operator bekommt dabei den aktuellen Wert, macht damit irgendetwas und die Rückgabe wird der neue Wert.
+
+\subsection{Die Klasse ConcurrentList}
+Erstellen Sie die Klasse \texttt{ConcurrentList} und implementieren Sie folgendes Interface. Nutzen Sie dafür die zuvor erstelle Klasse \texttt{ListElement}. Die Klasse soll lediglich über zwei Attribute verfügen, das Lock und das erste Listenelement. Achten Sie darauf, dass innerhalb Ihrer Implementierung weder \emph{race-conditions} noch \emph{dead-locks} auftreten, selbst wenn ein Nutzer die Liste \linebreak[2] – absichtlich oder unabsichtlich – unsachgemäß benutzt. Sie müssen also alle Methoden, bei denen Parameter übergeben werden, gegen möglicherweise geworfene Exceptions absichern.
+\begin{lstlisting}[language=Java]
+public interface List<S,T> {
+	int size();
+	
+	void add(S value1, T value2);
+	
+	int indexOf(ListElement<S, T> e);
+	
+	ListElement<S, T> get(int index); 
+	
+	ListElement<S, T> remove(int index);
+	
+	void forEach(Consumer<ListElement<S, T>> action);
+
+	void reverse();
+	
+	void doSelectionSort(Comparator<ListElement<S,T>> comp);
+}
+\end{lstlisting}
+Implementieren Sie das folgende Verhalten:
+\begin{enumerate}
+\item \texttt{size()} gibt die Anzahl der aktuell gespeicherten Elemente zurück.
+\item \texttt{add(S, T)} fügt an das Ende der Liste ein neues Element mit den übergebenen Werten hinzu, \texttt{null} ist erlaubt.
+\item \texttt{indexOf(ListElement<S, T>)} gibt den Index von dem \texttt{ListElement} zurück oder -1, wenn es nicht enthalten oder \texttt{null} ist. Nutzen Sie hierfür die vorher implementierte equals-Methode.
+\item \texttt{get(int)} gibt das \texttt{ListElement} an dem gegebenen Index zurück.
+\item \texttt{remove(int)} gibt das \texttt{ListElement} an dem gegebenen Index zurück und entfernt es aus der Liste.
+\item \texttt{forEach(Consumer<ListElement<S, T>>)} führt die accept-Methode des Consumers nacheinander für alle Elemente der Liste aus.
+\item \texttt{reverse()} kehrt die Reihenfolge der Elemente in der Liste um.
+\item \texttt{doSelectionSort()} sortiert die Liste mit Selectionsort und benutzt dafür den übergebenen Comparator. Mit \texttt{comp.compare(o1, o2)} können zwei \texttt{ListElement}-Objekte verglichen werden. Ist der Rückgabewert positiv, gilt $o1 > o2$, ist er negativ, gilt $o1 < o2$; andernfalls $o1 \simeq o2$. Sortieren Sie die Liste aufsteigend. Achten Sie darauf, dass sich die Liste in jedem Fall in einem validen Zustand befindet. \hspace*{\fill}\emph{[Achtung: sehr anspruchsvoll]}
+\end{enumerate}
+Verwenden Sie so wenig Synchronisation wie möglich, um nicht die Parallelität zu behindern; aber genug, damit keine \emph{race-conditions} oder \emph{dead-locks} auftreten können. So sollen z.B. mehrere \texttt{get(int)}- und \texttt{size()}-Aufrufe gleichzeitig möglich sein. Sie können für die Liste selbst wieder ein \texttt{ReentrantReadWriteLock} verwenden und beliebig viele private Hilfsmethoden schreiben. Denken Sie daran, dass Sie die Aufgaben rekursiv lösen müssen. Stellen Sie einen öffentlichen, parameterlosen Konstruktor zur Verfügung. Werfen Sie bei der Übergabe von ungültigen Parametern passende Exceptions.\par
+Implementieren Sie für \texttt{ConcurrentList} ebenfalls die Methode equals() gemäß dem Kontrakt.
+
+\printbibliography
+\end{document}
