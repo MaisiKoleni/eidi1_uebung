@@ -6,7 +6,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @SuiteClasses({ ListElementTest.class, ConcurrentListTest.class })
 @RunWith(Suite.class)
-public class TestSynchoneRekursion {
+public class TestSynchroneRekursion {
     /*
      * Führt die Tests in korrekter Reihenfolge aus
      */
