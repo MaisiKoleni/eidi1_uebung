@@ -15,6 +15,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -87,16 +93,9 @@ public class ListElementTest {
             } else if (pars.length == 1) {
                 instance = c.newInstance(new Object[] { null });
             } else if (pars.length == 2) {
-                instance = c.newInstance(new Object(), new Object());
+                instance = c.newInstance(null, null);
             } else if (pars.length == 3) {
-                Object[] args = new Object[3];
-                for (int i = 0; i < cs.length; i++) {
-                    if (pars[i].equals(listElement))
-                        args[i] = null;
-                    else
-                        args[i] = new Object();
-                }
-                instance = c.newInstance(args);
+                instance = c.newInstance(null, null, null);
             }
         }
         return Objects.requireNonNull(instance, "makeInstance() konnte kein Objekt erzeugen");
@@ -150,7 +149,7 @@ public class ListElementTest {
             m.setAccessible(true);
             if (Modifier.isPrivate(m.getModifiers()))
                 continue;
-            assertTrue("Methodennamen beginnen in Java per Konvention mit einem Kleinbuchstaben:\n"+m,
+            assertTrue("Methodennamen beginnen in Java per Konvention mit einem Kleinbuchstaben:\n" + m,
                     Character.isLowerCase(m.getName().charAt(0)));
             Type ret = m.getGenericReturnType();
             Parameter[] params = m.getParameters();
@@ -201,7 +200,7 @@ public class ListElementTest {
                 // UPDATE 2
                 assertEquals("updateVal2 sollte keine Typparameter haben", 0, m.getTypeParameters().length);
                 assertTrue("updateVal2 muss öffentlich sein", Modifier.isPublic(m.getModifiers()));
-                assertTrue("updateVal1 operator Typparameter ist nicht gleich Nr.1 der Klasse",
+                assertTrue("updateVal2 operator Typparameter ist nicht gleich Nr.1 der Klasse",
                         paramTypeEquals(params[0].getParameterizedType(), UnaryOperator.class, types[1]));
                 if (!methods.containsKey("updateVal2"))
                     methods.put("updateVal2", m);
@@ -210,12 +209,20 @@ public class ListElementTest {
             } else if (params.length == 1 && Object.class.equals(params[0].getType()) && m.getName().equals("equals")
                     && Boolean.TYPE.equals(ret)) {
                 // EQUALS
-                assertEquals("updateVal2 darf keine Typparameter haben", 0, m.getTypeParameters().length);
+                assertEquals("equals darf keine Typparameter haben", 0, m.getTypeParameters().length);
                 assertTrue("equals muss öffentlich sein", Modifier.isPublic(m.getModifiers()));
                 if (!methods.containsKey("equals"))
                     methods.put("equals", m);
                 else
                     fail("equals sollte es nur einmal geben");
+            } else if (params.length == 0 && m.getName().equals("hashCode") && Integer.TYPE.equals(ret)) {
+                // HASHCODE
+                assertEquals("hashCode darf keine Typparameter haben", 0, m.getTypeParameters().length);
+                assertTrue("hashCode muss öffentlich sein", Modifier.isPublic(m.getModifiers()));
+                if (!methods.containsKey("hashCode"))
+                    methods.put("hashCode", m);
+                else
+                    fail("hashCode sollte es nur einmal geben");
             } else if (ret.equals(types[0]) && params.length == 0) {
                 // GETTER 1
                 assertTrue("Getter " + m + " sollte mit get anfangen", m.getName().startsWith("get"));
@@ -259,10 +266,284 @@ public class ListElementTest {
         }
         Set<String> expected = Set.of("getVal1Lock", "getVal2Lock", "getNext", "setNext", "updateVal1", "updateVal2",
                 "getVal1", "getVal2", "setVal1", "setVal2", "equals");
-        if (!expected.equals(methods.keySet())) {
+        if (expected.stream().filter(x -> !methods.containsKey(x)).count() > 0) {
             fail("Die folgenden elementaren Bestandteile von ListElement fehlen: "
                     + expected.stream().filter(x -> !methods.containsKey(x)).collect(Collectors.toList()));
         }
+    }
+
+    @Test
+    public void testMethod_equals() throws ReflectiveOperationException {
+        Method equals = methods.get("equals");
+        Field next = fields.get("next");
+        Field val1 = fields.get("val1");
+        Field val2 = fields.get("val2");
+        assertNotNull("equals(Object) nicht gefunden", equals);
+        assertNotNull("Attribut vom ersten Typ nicht gefunden", val1);
+        assertNotNull("Attribut vom zweiten Typ nicht gefunden", val2);
+        assertNotNull("Attribut vom nächsten Element nicht gefunden", next);
+        Object le1 = makeInstance();
+        Object le2 = makeInstance();
+
+        // null Sicherheit
+        assertFalse((Boolean) equals.invoke(le1, new Object[] { null }));
+        // andere Typen
+        assertFalse((Boolean) equals.invoke(le1, new Object()));
+        assertFalse((Boolean) equals.invoke(le1, new String("")));
+        // Reflexivität 1
+        assertTrue((Boolean) equals.invoke(le1, le1));
+        assertTrue((Boolean) equals.invoke(le2, le2));
+        // Gleichheit & Symmetrie
+        assertTrue((Boolean) equals.invoke(le1, le2));
+        assertTrue((Boolean) equals.invoke(le2, le1));
+        val1.set(le1, new String("a"));
+        assertFalse((Boolean) equals.invoke(le1, le2));
+        assertFalse((Boolean) equals.invoke(le2, le1));
+        // ... Reflexivität 2
+        assertTrue((Boolean) equals.invoke(le1, le1));
+        assertTrue((Boolean) equals.invoke(le2, le2));
+        val1.set(le2, new String("a"));
+        assertTrue((Boolean) equals.invoke(le1, le2));
+        assertTrue((Boolean) equals.invoke(le2, le1));
+        // ... with val2
+        val2.set(le1, Integer.valueOf(10_000));
+        assertFalse((Boolean) equals.invoke(le1, le2));
+        assertFalse((Boolean) equals.invoke(le2, le1));
+        val2.set(le2, Integer.valueOf(10_000));
+        assertTrue((Boolean) equals.invoke(le1, le2));
+        assertTrue((Boolean) equals.invoke(le2, le1));
+        // null Sicherheit mit non-null Werten
+        assertFalse((Boolean) equals.invoke(le1, new Object[] { null }));
+        // next hat keinen Einfluss
+        class NoEquals {
+            @Override
+            public boolean equals(Object obj) {
+                fail("Equals sollte hier nicht aufgerufen werden");
+                throw new RuntimeException();
+            }
+
+            @Override
+            public int hashCode() {
+                return 0;
+            }
+        }
+        Object le3 = makeInstance();
+        Object le4 = makeInstance();
+        val1.set(le3, new NoEquals());
+        val1.set(le4, new NoEquals());
+        val2.set(le3, new NoEquals());
+        val2.set(le4, new NoEquals());
+        next.set(le1, le3);
+        next.set(le2, le4);
+        assertTrue((Boolean) equals.invoke(le1, le2));
+        assertTrue((Boolean) equals.invoke(le2, le1));
+        // equals Reflexivität über Referenz-Gleichheit
+        val1.set(le1, new NoEquals());
+        val2.set(le1, new NoEquals());
+        assertTrue((Boolean) equals.invoke(le1, le1));
+    }
+
+    @Test
+    public void testMethod_getSetVal1() throws ReflectiveOperationException {
+        Method get = methods.get("getVal1");
+        Method set = methods.get("setVal1");
+        Field val1 = fields.get("val1");
+        assertNotNull("Getter für den ersten Typ nicht gefunden", get);
+        assertNotNull("Setter für den ersten Typ nicht gefunden", set);
+        assertNotNull("Attribut vom ersten Typ nicht gefunden", val1);
+
+        testGetSetVal(val1, get, set);
+    }
+
+    @Test
+    public void testMethod_getSetVal2() throws ReflectiveOperationException {
+        Method get = methods.get("getVal2");
+        Method set = methods.get("setVal2");
+        Field val2 = fields.get("val2");
+        assertNotNull("Getter für den zweiten Typ nicht gefunden", get);
+        assertNotNull("Setter für den zweiten Typ nicht gefunden", set);
+        assertNotNull("Attribut vom zweiten Typ nicht gefunden", val2);
+
+        testGetSetVal(val2, get, set);
+    }
+
+    private void testGetSetVal(Field val, Method get, Method set) throws ReflectiveOperationException {
+        Object le = makeInstance();
+        Object o = new Object();
+        // GETTER
+        val.set(le, null);
+        assertNull(get.invoke(le));
+        val.set(le, "test");
+        assertSame("test", get.invoke(le));
+        val.set(le, o);
+        assertSame(o, get.invoke(le));
+        // SETTER
+        set.invoke(le, new Object[] { null });
+        assertNull(val.get(le));
+        set.invoke(le, "test");
+        assertSame("test", val.get(le));
+        set.invoke(le, o);
+        assertSame(o, val.get(le));
+    }
+
+    @Test
+    public void testMethod_updateVal1() throws ReflectiveOperationException, InterruptedException {
+        Method update = methods.get("updateVal1");
+        Field val1 = fields.get("val1");
+        assertNotNull("updateVal1 nicht gefunden", update);
+        assertNotNull("Attribut vom ersten Typ nicht gefunden", val1);
+
+        testUpdateMethod(val1, update);
+    }
+
+    @Test
+    public void testMethod_updateVal2() throws ReflectiveOperationException, InterruptedException {
+        Method update = methods.get("updateVal2");
+        Field val2 = fields.get("val2");
+        assertNotNull("updateVal2 nicht gefunden", update);
+        assertNotNull("Attribut vom zweiten Typ nicht gefunden", val2);
+
+        testUpdateMethod(val2, update);
+    }
+
+    private void testUpdateMethod(Field val, Method update) throws ReflectiveOperationException, InterruptedException {
+        Object le = makeInstance();
+
+        val.set(le, Integer.valueOf(0));
+        update.invoke(le, (UnaryOperator<Object>) i -> Integer.valueOf((Integer) i + 1));
+        assertEquals(Integer.valueOf(1), val.get(le));
+
+        ExecutorService pool = Executors.newFixedThreadPool(10);
+        UnaryOperator<Object> incAndSleep = i -> {
+            Integer res = Integer.valueOf((Integer) i + 1);
+            try {
+                Thread.sleep(10);
+            } catch (@SuppressWarnings("unused") InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            return res;
+        };
+        val.set(le, Integer.valueOf(0));
+        for (int j = 0; j < 50; j++) {
+            pool.submit(() -> {
+                update.invoke(le, incAndSleep);
+                return null;
+            });
+        }
+
+        pool.shutdown();
+        boolean finished = pool.awaitTermination(5, TimeUnit.SECONDS);
+        assertTrue(finished);
+        assertEquals(Integer.valueOf(50), val.get(le));
+    }
+
+    @Test
+    public void testMethod_getValLock() throws ReflectiveOperationException {
+        Method gl1 = methods.get("getVal1Lock");
+        Method gl2 = methods.get("getVal2Lock");
+        Object le = makeInstance();
+
+        Object l1 = gl1.invoke(le);
+        Object l2 = gl2.invoke(le);
+        assertNotNull(l1);
+        assertNotNull(l2);
+        assertNotSame(l1, l2);
+    }
+
+    @Test
+    public void testMethodsCombined1()
+            throws ReflectiveOperationException, InterruptedException, BrokenBarrierException {
+        Method getThis = methods.get("getVal1");
+        Method setThis = methods.get("setVal1");
+        Method updateThis = methods.get("updateVal1");
+        Method getOther = methods.get("getVal2");
+        Method setOther = methods.get("setVal2");
+        Method updateOther = methods.get("updateVal2");
+        testMethodsCombined(getThis, getOther, setThis, setOther, updateThis, updateOther);
+    }
+
+    @Test
+    public void testMethodsCombined2()
+            throws ReflectiveOperationException, InterruptedException, BrokenBarrierException {
+        Method getThis = methods.get("getVal2");
+        Method setThis = methods.get("setVal2");
+        Method updateThis = methods.get("updateVal2");
+        Method getOther = methods.get("getVal1");
+        Method setOther = methods.get("setVal1");
+        Method updateOther = methods.get("updateVal1");
+        testMethodsCombined(getThis, getOther, setThis, setOther, updateThis, updateOther);
+    }
+
+    private void testMethodsCombined(Method get1, Method get2, Method set1, Method set2, Method update1, Method update2)
+            throws ReflectiveOperationException, InterruptedException, BrokenBarrierException {
+        Object le = makeInstance();
+
+        CyclicBarrier cb = new CyclicBarrier(2);
+        UnaryOperator<Object> wait = i -> {
+            try {
+                cb.await();
+                cb.await();
+            } catch (@SuppressWarnings("unused") InterruptedException | BrokenBarrierException e) {
+                Thread.currentThread().interrupt();
+            }
+            return i;
+        };
+        ExecutorService blocker = Executors.newSingleThreadExecutor();
+        blocker.submit(() -> {
+            update1.invoke(le, wait);
+            return null;
+        });
+        cb.await(); // WAIT
+        ExecutorService blocked = Executors.newFixedThreadPool(4);
+        blocked.submit(() -> {
+            get1.invoke(le, new Object());
+            return null;
+        });
+        blocked.submit(() -> {
+            set1.invoke(le, new Object());
+            return null;
+        });
+        ExecutorService working = Executors.newFixedThreadPool(4);
+        working.submit(() -> {
+            update2.invoke(le, (UnaryOperator<Object>) i -> i);
+            return null;
+        });
+        working.submit(() -> {
+            get2.invoke(le, new Object());
+            return null;
+        });
+        working.submit(() -> {
+            set2.invoke(le, new Object());
+            return null;
+        });
+        working.shutdown();
+        assertTrue("Methoden vom andere Wert werden blockiert", working.awaitTermination(500, TimeUnit.MILLISECONDS));
+        blocked.shutdown();
+        assertFalse("get und set werden nicht blockiert", blocked.awaitTermination(500, TimeUnit.MILLISECONDS));
+        try {
+            cb.await(500, TimeUnit.MILLISECONDS);
+        } catch (TimeoutException e) {
+            fail(e.toString());
+        }
+        assertTrue("get und set noch immer blockiert", blocked.awaitTermination(500, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void testMethod_hashCode() throws ReflectiveOperationException {
+        if (!methods.containsKey("hashCode"))
+            return; // War nicht Teil der Aufgabenstellung
+        Method hc = methods.get("hashCode");
+        Object le1 = makeInstance();
+        Object le2 = makeInstance();
+        assertEquals(hc.invoke(le1), hc.invoke(le2));
+
+        Field val1 = fields.get("val1");
+        Field val2 = fields.get("val2");
+        val1.set(le1, "xyz");
+        val2.set(le1, new Object());
+        val1.set(le2, null);
+        val2.set(le2, Integer.valueOf(128));
+        assertEquals(hc.invoke(le1), hc.invoke(le2));
     }
 
     public static boolean signaturesEqual(Method m1, Method m2) {
