@@ -14,4 +14,4 @@ Die eigene  Lösung kommt in das src package, die Musterlösung ist unter "loesu
 Um die Musterlösung zu nutzen, diese einfach nach src verschieben (am besten ohne alle Referenzen zu aktualisieren).
 Aus den genannen Gründen *kompiliert der Code nicht auf anhieb*.
 
-Zum Testen die Klasse ["TestSynchroneRekursion"](ueb_batt_1/tests/TestSynchroneRekursion.java) ausführen.
+Zum Testen die Klasse ["TestSynchroneRekursion"](ueb_blatt_1/tests/TestSynchroneRekursion.java) ausführen.
