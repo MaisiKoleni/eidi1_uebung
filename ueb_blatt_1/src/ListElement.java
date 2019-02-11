@@ -87,22 +87,43 @@ public class ListElement<S, T> {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(val1, val2);
+    public String toString() {
+        return "(" + val1 + ", " + val2 + ")";
     }
 
     @Override
     public boolean equals(Object obj) {
+        /*
+         * equals zu synchronisieren ist begrenzt sinnvoll, gemacht habe ich es, um
+         * wenigstens Cache-Kohärenz zu erzwingen; zu Fehlern führt es jedenfalls nicht,
+         * man kann es nur nicht wirklich sinnvoll einsetzten. Hier bräuchte es eine
+         * equals(Object o, Consumer<Boolean> callback) Methode.
+         */
         if (this == obj)
             return true;
         if (!(obj instanceof ListElement))
             return false;
         ListElement<?, ?> other = (ListElement<?, ?>) obj;
-        return Objects.equals(val1, other.val1) && Objects.equals(val2, other.val2);
+        this.val1Lock.readLock().lock();
+        this.val2Lock.readLock().lock();
+        other.val1Lock.readLock().lock();
+        other.val2Lock.readLock().lock();
+        try {
+            return Objects.equals(val1, other.val1) && Objects.equals(val2, other.val2);
+        } finally {
+            other.val2Lock.readLock().lock();
+            other.val1Lock.readLock().lock();
+            this.val2Lock.readLock().lock();
+            this.val1Lock.readLock().lock();
+        }
     }
 
     @Override
-    public String toString() {
-        return "(" + val1 + ", " + val2 + ")";
+    public int hashCode() {
+        /*
+         * Die einzige legale Möglichkeit, hashCode() gemäß Kontrakt für komplett
+         * veränderliche Objekte zu implementieren
+         */
+        return 0;
     }
 }

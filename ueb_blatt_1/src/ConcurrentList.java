@@ -248,12 +248,22 @@ public class ConcurrentList<S, T> implements List<S, T> {
 
     @Override
     public boolean equals(Object obj) {
+        /*
+         * Ähnlich wie bei ListElement.
+         */
         if (obj == this)
             return true;
         if (!(obj instanceof ConcurrentList))
             return false;
         ConcurrentList<?, ?> other = (ConcurrentList<?, ?>) obj;
-        return equalsRecursive(first, other.first);
+        this.lock.readLock().lock();
+        other.lock.readLock().lock();
+        try {
+            return equalsRecursive(first, other.first);
+        } finally {
+            other.lock.readLock().unlock();
+            this.lock.readLock().unlock();
+        }
     }
 
     private boolean equalsRecursive(ListElement<?, ?> e1, ListElement<?, ?> e2) {
@@ -282,53 +292,10 @@ public class ConcurrentList<S, T> implements List<S, T> {
 
     @Override
     public int hashCode() {
+        /*
+         * Die einzige legale Möglichkeit, hashCode() gemäß Kontrakt für komplett
+         * veränderliche Objekte zu implementieren
+         */
         return 0;
     }
-
-    public static void main(String[] args) {
-        ConcurrentList<String, String> l = new ConcurrentList<>();
-        System.out.println(l.size());
-        System.out.println(l);
-        l.reverse();
-        l.add("a", "a");
-        l.add("b", "b");
-        l.add("c", "c");
-        l.add("d", "d");
-        System.out.println(l.size());
-        System.out.println(l.get(0));
-        System.out.println(l.get(1));
-        System.out.println(l.get(2));
-        System.out.println(l);
-        l.reverse();
-        System.out.println(l);
-        l.swap(l.get(0), l.get(2));
-        System.out.println(l);
-        l.swap(l.get(1), l.get(3));
-        System.out.println(l);
-        l.swap(l.get(1), l.get(2));
-        System.out.println(l);
-        int[] a = { 5 };
-        try {
-            l.doSelectionSort((l1, l2) -> {
-                if (a[0]-- > 0)
-                    return l1.getVal1().compareTo(l2.getVal1());
-                throw new NullPointerException();
-            });
-        } catch (Exception e) {
-            System.out.print("catched ");
-            e.printStackTrace();
-        }
-        System.out.println(l);
-        for (int i = 0; i < 4; i++) {
-            l.get(i).setVal2("x");
-        }
-        l.reverse();
-        l.doSelectionSort((l1, l2) -> l1.getVal1().compareTo(l2.getVal1()));
-        System.out.println(l);
-        for (int i = 0; i < 4; i++) {
-            l.get(i).setVal2("y");
-        }
-        System.out.println(l.indexOf(new ListElement<>("c", "y")));
-    }
-
 }
