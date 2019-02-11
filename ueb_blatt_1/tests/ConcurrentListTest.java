@@ -301,6 +301,8 @@ public class ConcurrentListTest {
         Object le = l1.get(1000);
         setVal(le, null);
         assertThrows(() -> l1.doSelectionSort((a, b) -> comp.compare(a, b)), RuntimeException.class);
+        assertLockFree(l1);
+        assertLockFree(l2);
         setVal(le, getVal(l2.get(1000)));
         l1.doSelectionSort((a, b) -> comp.compare(a, b));
         assertEquals(l1, l2);
@@ -315,6 +317,12 @@ public class ConcurrentListTest {
         assertTrue(es.awaitTermination(20, TimeUnit.SECONDS));
         assertEquals(size, l1.size());
         assertEquals(l1, l2);
+        assertLockFree(l1);
+        assertLockFree(l2);
+
+        for (int j = 0; j < l1.size(); j++) {
+            setVal(l1.get(j), null);
+        }
         assertLockFree(l1);
         assertLockFree(l2);
     }
