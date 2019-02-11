@@ -14,6 +14,6 @@ Die eigene  Lösung kommt in das src package, die Musterlösung ist unter "loesu
 Um die Musterlösung zu nutzen, diese einfach nach src verschieben (am besten ohne alle Referenzen zu aktualisieren).
 Aus den genannen Gründen *kompiliert der Code nicht auf anhieb*.
 
-Bitte beachtet, dass die Aufgabe nicht wirklich für die Bearbeitung innerhalb der IDE und damit auch für das Testen des Codes konzipiert war, sie lässt etwas zu viele Freihheiten gerade bei der benennung der Methoden. Es muss also ggf. ansich richtiger Code etwas angepasst werden.
+Bitte beachtet, dass die Aufgabe nicht wirklich für die Bearbeitung innerhalb der IDE und damit auch für das Testen des Codes konzipiert war, sie lässt etwas zu viele Freihheiten gerade bei der Benennung der Methoden. Es muss also ggf. Code, der für sich richtig ist, etwas angepasst werden.
 
 Zum Testen die Klasse ["TestSynchroneRekursion"](ueb_blatt_1/tests/TestSynchroneRekursion.java) ausführen.
