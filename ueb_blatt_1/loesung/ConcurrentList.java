@@ -1,4 +1,4 @@
-package src;
+package loesung;
 
 import java.util.Comparator;
 import java.util.Objects;

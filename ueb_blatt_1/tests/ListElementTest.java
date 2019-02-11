@@ -33,6 +33,8 @@ import org.junit.runners.MethodSorters;
 @SuppressWarnings("static-method")
 public class ListElementTest {
 
+    private static final String SRC_LIST_ELEMENT = "src.ListElement";
+
     private static TypeVariable<?>[] types = new TypeVariable<?>[2];
     private static Map<String, Field> fields = new HashMap<>();
     private static Map<String, Method> methods = new HashMap<>();
@@ -41,7 +43,7 @@ public class ListElementTest {
     public void testClassStructure() {
         Class<?> listElement = null;
         try {
-            listElement = Class.forName("src.ListElement");
+            listElement = Class.forName(SRC_LIST_ELEMENT);
         } catch (@SuppressWarnings("unused") ClassNotFoundException e) {
             fail("Keine Klasse \"src.ListElement\" gefunden. Ist die Klasse falsch benannt oder nicht im vorgesehenen Package?");
             return;
@@ -49,7 +51,7 @@ public class ListElementTest {
         assertFalse("ListElement darf kein Enum sein", listElement.isEnum());
         assertFalse("ListElement darf kein Interface sein", listElement.isInterface());
         assertFalse("ListElement darf keine abstrakte Klasse sein", Modifier.isAbstract(listElement.getModifiers()));
-        assertFalse("ListElement darf keine Annotaion sein", listElement.isAnnotation());
+        assertFalse("ListElement darf keine Annotation sein", listElement.isAnnotation());
         assertEquals("ListElement sollte von keiner Klasse (außer Object) erben", Object.class,
                 listElement.getSuperclass());
         if (listElement.getInterfaces().length != 0) {
@@ -64,22 +66,22 @@ public class ListElementTest {
             }
             numT++;
         }
+        assertEquals("ListElement sollte exakt 2 Typparameter haben", 2, numT);
         if (listElement.getDeclaredClasses().length != 0) {
             fail("ListElement sollte keine geschachtelten Klassen besitzen.\n"
                     + "(Das ist hier overkill; wenn ihr meint, dass das hier Sinn ergibt, schreibt mir, warum.)");
         }
-        assertEquals("ListElement sollte exakt 2 Typparameter haben", 2, numT);
         types[0] = listElement.getTypeParameters()[0];
         types[1] = listElement.getTypeParameters()[1];
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void testConstructor() throws ReflectiveOperationException {
         makeInstance();
     }
 
-    Object makeInstance() throws ReflectiveOperationException {
-        Class<?> listElement = Class.forName("src.ListElement");
+    static Object makeInstance() throws ReflectiveOperationException {
+        Class<?> listElement = Class.forName(SRC_LIST_ELEMENT);
         Constructor<?>[] cs = listElement.getDeclaredConstructors();
         Object instance = null;
         for (Constructor<?> c : cs) {
@@ -103,12 +105,12 @@ public class ListElementTest {
 
     @Test
     public void testFields() throws ReflectiveOperationException {
-        Class<?> listElement = Class.forName("src.ListElement");
+        Class<?> listElement = Class.forName(SRC_LIST_ELEMENT);
         Field[] fs = listElement.getDeclaredFields();
         for (Field f : fs) {
             f.setAccessible(true);
             assertTrue("Attribute sollten private sein", Modifier.isPrivate(f.getModifiers()));
-            assertFalse("Statische Variablen sind hier nicht vorteilhaft/ntöig", Modifier.isStatic(f.getModifiers()));
+            assertFalse("Statische Variablen sind hier nicht vorteilhaft/nötig", Modifier.isStatic(f.getModifiers()));
             if (ReentrantReadWriteLock.class.equals(f.getType())) {
                 if (!fields.containsKey("lock1"))
                     fields.put("lock1", f);
@@ -142,7 +144,7 @@ public class ListElementTest {
 
     @Test
     public void testMethodContracts() throws ReflectiveOperationException {
-        Class<?> listElement = Class.forName("src.ListElement");
+        Class<?> listElement = Class.forName(SRC_LIST_ELEMENT);
         Method[] ms = listElement.getDeclaredMethods();
         List<Method> objectMethods = List.of(Object.class.getMethods());
         for (Method m : ms) {
@@ -272,7 +274,7 @@ public class ListElementTest {
         }
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void testMethod_equals() throws ReflectiveOperationException {
         Method equals = methods.get("equals");
         Field next = fields.get("next");
@@ -341,9 +343,11 @@ public class ListElementTest {
         val1.set(le1, new NoEquals());
         val2.set(le1, new NoEquals());
         assertTrue((Boolean) equals.invoke(le1, le1));
+        assertLockFree(le1);
+        assertLockFree(le2);
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void testMethod_getSetVal1() throws ReflectiveOperationException {
         Method get = methods.get("getVal1");
         Method set = methods.get("setVal1");
@@ -355,7 +359,7 @@ public class ListElementTest {
         testGetSetVal(val1, get, set);
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void testMethod_getSetVal2() throws ReflectiveOperationException {
         Method get = methods.get("getVal2");
         Method set = methods.get("setVal2");
@@ -384,9 +388,10 @@ public class ListElementTest {
         assertSame("test", val.get(le));
         set.invoke(le, o);
         assertSame(o, val.get(le));
+        assertLockFree(le);
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void testMethod_updateVal1() throws ReflectiveOperationException, InterruptedException {
         Method update = methods.get("updateVal1");
         Field val1 = fields.get("val1");
@@ -396,7 +401,7 @@ public class ListElementTest {
         testUpdateMethod(val1, update);
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void testMethod_updateVal2() throws ReflectiveOperationException, InterruptedException {
         Method update = methods.get("updateVal2");
         Field val2 = fields.get("val2");
@@ -435,9 +440,10 @@ public class ListElementTest {
         boolean finished = pool.awaitTermination(5, TimeUnit.SECONDS);
         assertTrue(finished);
         assertEquals(Integer.valueOf(50), val.get(le));
+        assertLockFree(le);
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void testMethod_getValLock() throws ReflectiveOperationException {
         Method gl1 = methods.get("getVal1Lock");
         Method gl2 = methods.get("getVal2Lock");
@@ -448,9 +454,10 @@ public class ListElementTest {
         assertNotNull(l1);
         assertNotNull(l2);
         assertNotSame(l1, l2);
+        assertLockFree(le);
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void testMethodsCombined1()
             throws ReflectiveOperationException, InterruptedException, BrokenBarrierException {
         Method getThis = methods.get("getVal1");
@@ -462,7 +469,7 @@ public class ListElementTest {
         testMethodsCombined(getThis, getOther, setThis, setOther, updateThis, updateOther);
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void testMethodsCombined2()
             throws ReflectiveOperationException, InterruptedException, BrokenBarrierException {
         Method getThis = methods.get("getVal2");
@@ -494,15 +501,6 @@ public class ListElementTest {
             return null;
         });
         cb.await(); // WAIT
-        ExecutorService blocked = Executors.newFixedThreadPool(4);
-        blocked.submit(() -> {
-            get1.invoke(le, new Object());
-            return null;
-        });
-        blocked.submit(() -> {
-            set1.invoke(le, new Object());
-            return null;
-        });
         ExecutorService working = Executors.newFixedThreadPool(4);
         working.submit(() -> {
             update2.invoke(le, (UnaryOperator<Object>) i -> i);
@@ -517,6 +515,16 @@ public class ListElementTest {
             return null;
         });
         working.shutdown();
+        Thread.sleep(100); // Safety because auf ReentrantReadWriteLock behaviour
+        ExecutorService blocked = Executors.newFixedThreadPool(4);
+        blocked.submit(() -> {
+            get1.invoke(le, new Object());
+            return null;
+        });
+        blocked.submit(() -> {
+            set1.invoke(le, new Object());
+            return null;
+        });
         assertTrue("Methoden vom andere Wert werden blockiert", working.awaitTermination(500, TimeUnit.MILLISECONDS));
         blocked.shutdown();
         assertFalse("get und set werden nicht blockiert", blocked.awaitTermination(500, TimeUnit.MILLISECONDS));
@@ -526,9 +534,27 @@ public class ListElementTest {
             fail(e.toString());
         }
         assertTrue("get und set noch immer blockiert", blocked.awaitTermination(500, TimeUnit.MILLISECONDS));
+        // Funktioniert alles noch?
+        set1.invoke(le, "abc");
+        set2.invoke(le, "abc");
+        get1.invoke(le);
+        get2.invoke(le);
+        update1.invoke(le, (UnaryOperator<Object>) i -> {
+            if (i != "abc")
+                fail();
+            return i;
+        });
+        update2.invoke(le, (UnaryOperator<Object>) i -> {
+            if (i != "abc")
+                fail();
+            return i;
+        });
+        blocker.shutdown();
+        blocker.awaitTermination(1, TimeUnit.SECONDS);
+        assertLockFree(le);
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void testMethod_hashCode() throws ReflectiveOperationException {
         if (!methods.containsKey("hashCode"))
             return; // War nicht Teil der Aufgabenstellung
@@ -544,6 +570,13 @@ public class ListElementTest {
         val1.set(le2, null);
         val2.set(le2, Integer.valueOf(128));
         assertEquals(hc.invoke(le1), hc.invoke(le2));
+        assertLockFree(le1);
+        assertLockFree(le2);
+    }
+
+    static void assertLockFree(Object le) throws IllegalAccessException {
+        ConcurrentListTest.assertLockFree((ReentrantReadWriteLock) fields.get("lock1").get(le));
+        ConcurrentListTest.assertLockFree((ReentrantReadWriteLock) fields.get("lock2").get(le));
     }
 
     public static boolean signaturesEqual(Method m1, Method m2) {
@@ -551,7 +584,7 @@ public class ListElementTest {
             return true;
         if (m1 == null || m2 == null)
             return false;
-        if (!Objects.deepEquals(m1.getName(), m2.getName()))
+        if (!Objects.equals(m1.getName(), m2.getName()))
             return false;
         return Objects.deepEquals(m1.getGenericParameterTypes(), m2.getGenericParameterTypes());
     }

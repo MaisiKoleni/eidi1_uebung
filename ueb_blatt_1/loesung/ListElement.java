@@ -1,4 +1,4 @@
-package src;
+package loesung;
 
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -111,10 +111,10 @@ public class ListElement<S, T> {
         try {
             return Objects.equals(val1, other.val1) && Objects.equals(val2, other.val2);
         } finally {
-            other.val2Lock.readLock().lock();
-            other.val1Lock.readLock().lock();
-            this.val2Lock.readLock().lock();
-            this.val1Lock.readLock().lock();
+            other.val2Lock.readLock().unlock();
+            other.val1Lock.readLock().unlock();
+            this.val2Lock.readLock().unlock();
+            this.val1Lock.readLock().unlock();
         }
     }
 
