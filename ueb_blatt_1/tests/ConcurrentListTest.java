@@ -562,29 +562,4 @@ public class ConcurrentListTest {
                 fail("expected " + expected.getName() + " but was " + e.getClass().getName());
         }
     }
-
-    public static void main(String[] args) {
-        int[] a = { 5, 3, 19, 4, 3, 2, 4 };
-        sort(a);
-        System.out.println(Arrays.toString(a));
-    }
-
-    static void sort(int[] a) {
-        sortRec(a, a.length, 0);
-    }
-
-    static void sortRec(int[] a, int iter, int pos) {
-        if (iter <= 0)
-            return;
-        if (pos + 1 < a.length) {
-            if (a[pos] > a[pos + 1]) {
-                int temp = a[pos];
-                a[pos] = a[pos + 1];
-                a[pos + 1] = temp;
-            }
-            sortRec(a, iter, pos + 1);
-        }
-        if (pos == 0)
-            sortRec(a, iter - 1, 0);
-    }
 }
