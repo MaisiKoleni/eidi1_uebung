@@ -128,7 +128,7 @@ public class ConcurrentListTest {
         assertEquals(l1.hashCode(), l2.hashCode());
         assertLockFree(l1, l2);
 
-        testParallel(50, 500, 200, () -> assertEquals(l1.hashCode(), l2.hashCode()));
+        testParallel(50, 500, 1000, () -> assertEquals(l1.hashCode(), l2.hashCode()));
         assertLockFree(l1, l2);
     }
 
@@ -144,7 +144,7 @@ public class ConcurrentListTest {
         }
         assertLockFree(l);
 
-        testParallel(50, 500, 200, () -> l.add(null, null));
+        testParallel(50, 500, 1000, () -> l.add(null, null));
         assertEquals(5504, l.size());
         assertLockFree(l);
     }
@@ -168,7 +168,7 @@ public class ConcurrentListTest {
         assertEquals(Integer.valueOf(4999), getVal(le));
         assertLockFree(l);
 
-        testParallel(50, 500, 200, () -> l.get(4242));
+        testParallel(50, 500, 1000, () -> l.get(4242));
         assertLockFree(l);
     }
 
@@ -194,7 +194,7 @@ public class ConcurrentListTest {
         for (int i = 0; i < 500; i++) {
             l.add(Integer.valueOf(i), Integer.valueOf(i));
         }
-        testParallel(50, 500, 200, () -> l.remove(0));
+        testParallel(50, 500, 1000, () -> l.remove(0));
         assertEquals(2, l.size());
         assertLockFree(l);
     }
@@ -219,7 +219,7 @@ public class ConcurrentListTest {
         assertEquals(1002, l.size());
         assertLockFree(l);
 
-        testParallel(50, 500, 200, () -> assertEquals(1002, l.size()));
+        testParallel(50, 500, 1000, () -> assertEquals(1002, l.size()));
         assertLockFree(l);
     }
 
@@ -244,7 +244,7 @@ public class ConcurrentListTest {
             assertEquals(i, l1.indexOf(l1.get(i)));
         assertLockFree(l1, l2);
 
-        testParallel(50, 500, 200, () -> assertEquals(50, l1.indexOf(l1.get(50))));
+        testParallel(50, 500, 1000, () -> assertEquals(50, l1.indexOf(l1.get(50))));
         assertLockFree(l1, l2);
     }
 
@@ -280,7 +280,7 @@ public class ConcurrentListTest {
 
         l1.add("a", null);
         assertEquals(l1.get(0), l2.get(0));
-        testParallel(50, 500, 500, l2::reverse);
+        testParallel(50, 500, 1000, l2::reverse);
         assertEquals(5, l2.size());
         assertEquals(l1.get(0), l2.get(0));
         assertLockFree(l1, l2);
@@ -443,7 +443,7 @@ public class ConcurrentListTest {
         assertEquals(l2, l2);
         assertLockFree(l1, l2);
 
-        testParallel(50, 500, 500, () -> l1.equals(l2), () -> l2.equals(l1));
+        testParallel(50, 500, 1000, () -> l1.equals(l2), () -> l2.equals(l1));
         assertLockFree(l1, l2);
     }
 
@@ -561,5 +561,30 @@ public class ConcurrentListTest {
             if (!expected.isInstance(e))
                 fail("expected " + expected.getName() + " but was " + e.getClass().getName());
         }
+    }
+
+    public static void main(String[] args) {
+        int[] a = { 5, 3, 19, 4, 3, 2, 4 };
+        sort(a);
+        System.out.println(Arrays.toString(a));
+    }
+
+    static void sort(int[] a) {
+        sortRec(a, a.length, 0);
+    }
+
+    static void sortRec(int[] a, int iter, int pos) {
+        if (iter <= 0)
+            return;
+        if (pos + 1 < a.length) {
+            if (a[pos] > a[pos + 1]) {
+                int temp = a[pos];
+                a[pos] = a[pos + 1];
+                a[pos + 1] = temp;
+            }
+            sortRec(a, iter, pos + 1);
+        }
+        if (pos == 0)
+            sortRec(a, iter - 1, 0);
     }
 }
