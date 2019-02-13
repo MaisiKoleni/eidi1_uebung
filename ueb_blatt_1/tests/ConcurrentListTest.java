@@ -13,7 +13,9 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Random;
+import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -111,7 +113,7 @@ public class ConcurrentListTest {
     }
 
     @Test(timeout = 5000)
-    public void testHashCode() throws ReflectiveOperationException {
+    public void testMethod_hashCode() throws ReflectiveOperationException {
         try {
             Class.forName(SRC_CONCURRENT_LIST).getDeclaredMethod("hashCode");
         } catch (@SuppressWarnings("unused") NoSuchMethodException e) {
@@ -124,8 +126,10 @@ public class ConcurrentListTest {
         l2.add(new Object(), "abc");
         l2.add("!", null);
         assertEquals(l1.hashCode(), l2.hashCode());
-        assertLockFree(l1);
-        assertLockFree(l2);
+        assertLockFree(l1, l2);
+
+        testParallel(50, 500, 200, () -> assertEquals(l1.hashCode(), l2.hashCode()));
+        assertLockFree(l1, l2);
     }
 
     @Test(timeout = 5000)
@@ -138,6 +142,10 @@ public class ConcurrentListTest {
         for (int i = 0; i < 5_000; i++) {
             l.add(Integer.valueOf(i), Integer.valueOf(i));
         }
+        assertLockFree(l);
+
+        testParallel(50, 500, 200, () -> l.add(null, null));
+        assertEquals(5504, l.size());
         assertLockFree(l);
     }
 
@@ -159,6 +167,9 @@ public class ConcurrentListTest {
         assertNotNull(le);
         assertEquals(Integer.valueOf(4999), getVal(le));
         assertLockFree(l);
+
+        testParallel(50, 500, 200, () -> l.get(4242));
+        assertLockFree(l);
     }
 
     @Test(timeout = 5000)
@@ -178,6 +189,13 @@ public class ConcurrentListTest {
         le = l.remove(0);
         assertNotNull(le);
         assertTrue(getVal(le) == null || getVal(le) == "abc");
+        assertLockFree(l);
+
+        for (int i = 0; i < 500; i++) {
+            l.add(Integer.valueOf(i), Integer.valueOf(i));
+        }
+        testParallel(50, 500, 200, () -> l.remove(0));
+        assertEquals(2, l.size());
         assertLockFree(l);
     }
 
@@ -200,6 +218,9 @@ public class ConcurrentListTest {
         }
         assertEquals(1002, l.size());
         assertLockFree(l);
+
+        testParallel(50, 500, 200, () -> assertEquals(1002, l.size()));
+        assertLockFree(l);
     }
 
     @Test(timeout = 5000)
@@ -221,8 +242,10 @@ public class ConcurrentListTest {
             l1.add(i, i);
         for (int i = 0; i < 100; i++)
             assertEquals(i, l1.indexOf(l1.get(i)));
-        assertLockFree(l1);
-        assertLockFree(l2);
+        assertLockFree(l1, l2);
+
+        testParallel(50, 500, 200, () -> assertEquals(50, l1.indexOf(l1.get(50))));
+        assertLockFree(l1, l2);
     }
 
     @Test
@@ -243,6 +266,7 @@ public class ConcurrentListTest {
         l2.add("a", null);
         l1.reverse();
         assertEquals(l1.get(0), l2.get(0));
+        assertEquals(l1.get(4), l2.get(4));
         assertEquals(l1, l2);
         l2.reverse();
         assertNotEquals(l1, l2);
@@ -252,12 +276,18 @@ public class ConcurrentListTest {
             assertEquals(i, l2.indexOf(l1.remove(0)));
         }
         l1.reverse();
-        assertLockFree(l1);
-        assertLockFree(l2);
+        assertLockFree(l1, l2);
+
+        l1.add("a", null);
+        assertEquals(l1.get(0), l2.get(0));
+        testParallel(50, 500, 500, l2::reverse);
+        assertEquals(5, l2.size());
+        assertEquals(l1.get(0), l2.get(0));
+        assertLockFree(l1, l2);
     }
 
     @Test(timeout = 30_000)
-    public void testMethod_doSelectionSort() throws ReflectiveOperationException, InterruptedException {
+    public void testMethod_doSelectionSort() throws ReflectiveOperationException {
         List<Object, Object> l1 = makeInstance();
         List<Object, Object> l2 = makeInstance();
         l2.add(-12, -12);
@@ -286,8 +316,7 @@ public class ConcurrentListTest {
         assertEquals(l1, l2);
         l2.doSelectionSort((a, b) -> comp.compare(a, b));
         assertEquals(l1, l2);
-        assertLockFree(l1);
-        assertLockFree(l2);
+        assertLockFree(l1, l2);
 
         Random r = new Random(42);
         Integer[] nums = Stream.generate(() -> r.nextInt(500)).limit(2000).toArray(Integer[]::new);
@@ -296,35 +325,25 @@ public class ConcurrentListTest {
         int size = l1.size();
         l1.doSelectionSort((a, b) -> comp.compare(a, b));
         assertEquals(l1, l2);
-        assertLockFree(l1);
-        assertLockFree(l2);
+        assertLockFree(l1, l2);
         Object le = l1.get(1000);
         setVal(le, null);
         assertThrows(() -> l1.doSelectionSort((a, b) -> comp.compare(a, b)), RuntimeException.class);
-        assertLockFree(l1);
-        assertLockFree(l2);
+        assertLockFree(l1, l2);
         setVal(le, getVal(l2.get(1000)));
         l1.doSelectionSort((a, b) -> comp.compare(a, b));
         assertEquals(l1, l2);
-        assertLockFree(l1);
-        assertLockFree(l2);
+        assertLockFree(l1, l2);
 
-        ExecutorService es = Executors.newFixedThreadPool(10);
-        for (int j = 0; j < 10; j++) {
-            es.submit(() -> l1.doSelectionSort((a, b) -> comp.compare(a, b)));
-        }
-        es.shutdown();
-        assertTrue(es.awaitTermination(20, TimeUnit.SECONDS));
+        testParallel(10, 10, 20_000, () -> l1.doSelectionSort((a, b) -> comp.compare(a, b)));
         assertEquals(size, l1.size());
         assertEquals(l1, l2);
-        assertLockFree(l1);
-        assertLockFree(l2);
+        assertLockFree(l1, l2);
 
         for (int j = 0; j < l1.size(); j++) {
             setVal(l1.get(j), null);
         }
-        assertLockFree(l1);
-        assertLockFree(l2);
+        assertLockFree(l1, l2);
     }
 
     @Test(timeout = 8000)
@@ -333,6 +352,12 @@ public class ConcurrentListTest {
         l.add("a", "b");
         List<Object, Object> other = makeInstance();
         other.add("a", "b");
+        int[] count = { 0 };
+        l.forEach(le -> {
+            count[0]++;
+            assertEquals(other.get(0), le);
+        });
+
         CountDownLatch cdl1 = new CountDownLatch(11);
         CountDownLatch cdl2 = new CountDownLatch(11);
         Consumer<Object> wait = le -> {
@@ -389,6 +414,16 @@ public class ConcurrentListTest {
     public void testMethod_equals() throws ReflectiveOperationException {
         List<Object, Object> l1 = makeInstance();
         List<Object, Object> l2 = makeInstance();
+        // null Sicherheit
+        assertFalse(l1.equals(null));
+        assertFalse(l2.equals(null));
+        // andere Typen
+        assertFalse(l1.equals(new Object()));
+        assertFalse(l1.equals("xyz"));
+        // Reflexivität 1
+        assertTrue(l1.equals(l1));
+        assertTrue(l2.equals(l2));
+        // Gleichheit & Symmetrie
         assertEquals(l1, l2);
         l1.add(null, null);
         assertNotEquals(l1, l2);
@@ -403,8 +438,39 @@ public class ConcurrentListTest {
         assertEquals(l1, l2);
         setVal(l1.get(0), "z");
         assertNotEquals(l1, l2);
-        assertLockFree(l1);
-        assertLockFree(l2);
+        // ... Reflexivität 2
+        assertEquals(l1, l1);
+        assertEquals(l2, l2);
+        assertLockFree(l1, l2);
+
+        testParallel(50, 500, 500, () -> l1.equals(l2), () -> l2.equals(l1));
+        assertLockFree(l1, l2);
+    }
+
+    private void testParallel(int threads, int tasks, int msecTimeOut, Runnable... taskTypes) {
+        CyclicBarrier cb = new CyclicBarrier(threads + 1);
+        ExecutorService es = Executors.newFixedThreadPool(threads);
+        for (int i = 0; i < tasks; i++) {
+            final int index = i;
+            es.submit(() -> {
+                try {
+                    if (index < threads)
+                        cb.await();
+                    taskTypes[index % taskTypes.length].run();
+                } catch (InterruptedException | BrokenBarrierException e) {
+                    fail(e.toString());
+                    Thread.currentThread().interrupt();
+                }
+            });
+        }
+        try {
+            cb.await();
+            es.shutdown();
+            assertTrue(es.awaitTermination(msecTimeOut, TimeUnit.MILLISECONDS));
+        } catch (InterruptedException | BrokenBarrierException e) {
+            fail(e.toString());
+            Thread.currentThread().interrupt();
+        }
     }
 
     private static Method getVal = null;
@@ -465,8 +531,10 @@ public class ConcurrentListTest {
         return (ReentrantReadWriteLock) lock.get(le);
     }
 
-    private static void assertLockFree(List<?, ?> list) throws ReflectiveOperationException {
-        assertLockFree(getLock(list));
+    private static void assertLockFree(List<?, ?>... lists) throws ReflectiveOperationException {
+        for (List<?, ?> list : lists) {
+            assertLockFree(getLock(list));
+        }
     }
 
     static void assertLockFree(ReentrantReadWriteLock lock) {

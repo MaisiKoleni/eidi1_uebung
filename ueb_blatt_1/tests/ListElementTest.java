@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -343,8 +344,10 @@ public class ListElementTest {
         val1.set(le1, new NoEquals());
         val2.set(le1, new NoEquals());
         assertTrue((Boolean) equals.invoke(le1, le1));
-        assertLockFree(le1);
-        assertLockFree(le2);
+        assertLockFree(le1, le2);
+
+        testParallel(50, 500, 500, () -> equals.invoke(le1, le2), () -> equals.invoke(le2, le1));
+        assertLockFree(le1, le2);
     }
 
     @Test(timeout = 5000)
@@ -387,6 +390,10 @@ public class ListElementTest {
         set.invoke(le, "test");
         assertSame("test", val.get(le));
         set.invoke(le, o);
+        assertSame(o, val.get(le));
+        assertLockFree(le);
+
+        testParallel(50, 500, 200, () -> val.get(le), () -> set.invoke(le, o));
         assertSame(o, val.get(le));
         assertLockFree(le);
     }
@@ -440,6 +447,10 @@ public class ListElementTest {
         boolean finished = pool.awaitTermination(5, TimeUnit.SECONDS);
         assertTrue(finished);
         assertEquals(Integer.valueOf(50), val.get(le));
+        assertLockFree(le);
+
+        testParallel(50, 500, 500, () -> update.invoke(le, (UnaryOperator<Object>) x -> ((Integer) x) + 1));
+        assertEquals(Integer.valueOf(550), val.get(le));
         assertLockFree(le);
     }
 
@@ -552,6 +563,14 @@ public class ListElementTest {
         blocker.shutdown();
         blocker.awaitTermination(1, TimeUnit.SECONDS);
         assertLockFree(le);
+
+        testParallel(50, 500, 500, () -> set1.invoke(le, "x"), () -> set2.invoke(le, "y"), () -> get1.invoke(le),
+                () -> get2.invoke(le), () -> methods.get("equals").invoke(le, le),
+                () -> update1.invoke(le, (UnaryOperator<Object>) x -> x),
+                () -> update2.invoke(le, (UnaryOperator<Object>) x -> x));
+        assertEquals("x", get1.invoke(le));
+        assertEquals("y", get2.invoke(le));
+        assertLockFree(le);
     }
 
     @Test(timeout = 5000)
@@ -570,13 +589,45 @@ public class ListElementTest {
         val1.set(le2, null);
         val2.set(le2, Integer.valueOf(128));
         assertEquals(hc.invoke(le1), hc.invoke(le2));
-        assertLockFree(le1);
-        assertLockFree(le2);
+        assertLockFree(le1, le2);
+
+        testParallel(50, 500, 500, () -> hc.invoke(le1));
+        assertLockFree(le1, le2);
     }
 
-    static void assertLockFree(Object le) throws IllegalAccessException {
-        ConcurrentListTest.assertLockFree((ReentrantReadWriteLock) fields.get("lock1").get(le));
-        ConcurrentListTest.assertLockFree((ReentrantReadWriteLock) fields.get("lock2").get(le));
+    private void testParallel(int threads, int tasks, int msecTimeOut, Callable<?>... taskTypes) {
+        CyclicBarrier cb = new CyclicBarrier(threads + 1);
+        ExecutorService es = Executors.newFixedThreadPool(threads);
+        for (int i = 0; i < tasks; i++) {
+            final int index = i;
+            es.submit(() -> {
+                try {
+                    if (index < threads)
+                        cb.await();
+                    taskTypes[index % taskTypes.length].call();
+                } catch (InterruptedException | BrokenBarrierException e) {
+                    fail(e.toString());
+                    Thread.currentThread().interrupt();
+                } catch (Exception e) {
+                    fail(e.toString());
+                }
+            });
+        }
+        try {
+            cb.await();
+            es.shutdown();
+            assertTrue(es.awaitTermination(msecTimeOut, TimeUnit.MILLISECONDS));
+        } catch (InterruptedException | BrokenBarrierException e) {
+            fail(e.toString());
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    static void assertLockFree(Object... les) throws IllegalAccessException {
+        for (Object le : les) {
+            ConcurrentListTest.assertLockFree((ReentrantReadWriteLock) fields.get("lock1").get(le));
+            ConcurrentListTest.assertLockFree((ReentrantReadWriteLock) fields.get("lock2").get(le));
+        }
     }
 
     public static boolean signaturesEqual(Method m1, Method m2) {
