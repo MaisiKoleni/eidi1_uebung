@@ -5,7 +5,7 @@ import java.util.Objects;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 
-public class ConcurrentList<S, T> implements List<S, T> {
+public final class ConcurrentList<S, T> implements List<S, T> {
 
     private final ReentrantReadWriteLock lock;
 
@@ -124,10 +124,10 @@ public class ConcurrentList<S, T> implements List<S, T> {
 
     @Override
     public void reverse() {
-        if (first == null || first.getNext() == null)
-            return;
         lock.writeLock().lock();
         try {
+            if (first == null || first.getNext() == null)
+                return;
             ListElement<S, T> oldFirst = first;
             first = reverseRecursive(first);
             oldFirst.setNext(null);

@@ -4,7 +4,7 @@ import java.util.Objects;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.UnaryOperator;
 
-public class ListElement<S, T> {
+public final class ListElement<S, T> {
 
     private final ReentrantReadWriteLock val1Lock;
     private final ReentrantReadWriteLock val2Lock;
