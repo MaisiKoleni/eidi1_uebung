@@ -52,10 +52,12 @@ public class ConcurrentListTest {
         assertEquals("ConcurrentList sollte von keiner Klasse (außer Object) erben", Object.class,
                 list.getSuperclass());
         if (list.getInterfaces().length != 1) {
-            fail("ConcurrentList sollte das Interface src.List implementieren, gefunden: "
+            fail("ConcurrentList sollte einzig das Interface src.List implementieren, gefunden: "
                     + Arrays.toString(list.getInterfaces()));
         }
-        list.getInterfaces()[0].equals(List.class);
+        if (!list.getInterfaces()[0].equals(List.class)) {
+            fail("ConcurrentList sollte das Interface src.List implementieren, gefunden: " + list.getInterfaces()[0]);
+        }
         int numT = 0;
         for (TypeVariable<?> typeParam : list.getTypeParameters()) {
             for (Type bound : typeParam.getBounds()) {
