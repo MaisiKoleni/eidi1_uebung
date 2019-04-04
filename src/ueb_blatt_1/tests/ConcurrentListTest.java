@@ -1,4 +1,4 @@
-package tests;
+package ueb_blatt_1.tests;
 
 import static org.junit.Assert.*;
 
@@ -27,14 +27,14 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
-import src.List;
+import ueb_blatt_1.src.List;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @SuppressWarnings("static-method")
 public class ConcurrentListTest {
 
-    private static final String SRC_LIST_ELEMENT = "src.ListElement";
-    private static final String SRC_CONCURRENT_LIST = "src.ConcurrentList";
+    private static final String SRC_LIST_ELEMENT = "ueb_blatt_1.src.ListElement";
+    private static final String SRC_CONCURRENT_LIST = "ueb_blatt_1.src.ConcurrentList";
 
     @Test
     public void testClassStructure() {
@@ -42,7 +42,7 @@ public class ConcurrentListTest {
         try {
             list = Class.forName(SRC_CONCURRENT_LIST);
         } catch (@SuppressWarnings("unused") ClassNotFoundException e) {
-            fail("Keine Klasse \"src.ConcurrentList\" gefunden. Ist die Klasse falsch benannt oder nicht im vorgesehenen Package?");
+            fail("Keine Klasse \"ueb_blatt_1.src.ConcurrentList\" gefunden. Ist die Klasse falsch benannt oder nicht im vorgesehenen Package?");
             return;
         }
         assertFalse("ConcurrentList darf kein Enum sein", list.isEnum());
@@ -52,11 +52,11 @@ public class ConcurrentListTest {
         assertEquals("ConcurrentList sollte von keiner Klasse (außer Object) erben", Object.class,
                 list.getSuperclass());
         if (list.getInterfaces().length != 1) {
-            fail("ConcurrentList sollte einzig das Interface src.List implementieren, gefunden: "
+            fail("ConcurrentList sollte einzig das Interface ueb_blatt_1.src.List implementieren, gefunden: "
                     + Arrays.toString(list.getInterfaces()));
         }
         if (!list.getInterfaces()[0].equals(List.class)) {
-            fail("ConcurrentList sollte das Interface src.List implementieren, gefunden: " + list.getInterfaces()[0]);
+            fail("ConcurrentList sollte das Interface ueb_blatt_1.src.List implementieren, gefunden: " + list.getInterfaces()[0]);
         }
         int numT = 0;
         for (TypeVariable<?> typeParam : list.getTypeParameters()) {

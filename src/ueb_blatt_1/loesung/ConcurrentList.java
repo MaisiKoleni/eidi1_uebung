@@ -1,4 +1,4 @@
-package loesung;
+package ueb_blatt_1.loesung;
 
 import java.util.Comparator;
 import java.util.Objects;

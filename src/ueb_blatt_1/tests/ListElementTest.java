@@ -1,4 +1,4 @@
-package tests;
+package ueb_blatt_1.tests;
 
 import static org.junit.Assert.*;
 
@@ -34,7 +34,7 @@ import org.junit.runners.MethodSorters;
 @SuppressWarnings("static-method")
 public class ListElementTest {
 
-    private static final String SRC_LIST_ELEMENT = "src.ListElement";
+    private static final String SRC_LIST_ELEMENT = "ueb_blatt_1.src.ListElement";
 
     private static TypeVariable<?>[] types = new TypeVariable<?>[2];
     private static Map<String, Field> fields = new HashMap<>();
@@ -46,7 +46,7 @@ public class ListElementTest {
         try {
             listElement = Class.forName(SRC_LIST_ELEMENT);
         } catch (@SuppressWarnings("unused") ClassNotFoundException e) {
-            fail("Keine Klasse \"src.ListElement\" gefunden. Ist die Klasse falsch benannt oder nicht im vorgesehenen Package?");
+            fail("Keine Klasse \"ueb_blatt_1.src.ListElement\" gefunden. Ist die Klasse falsch benannt oder nicht im vorgesehenen Package?");
             return;
         }
         assertFalse("ListElement darf kein Enum sein", listElement.isEnum());

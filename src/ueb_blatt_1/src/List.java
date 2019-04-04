@@ -1,4 +1,4 @@
-package src;
+package ueb_blatt_1.src;
 
 import java.util.Comparator;
 import java.util.function.Consumer;
