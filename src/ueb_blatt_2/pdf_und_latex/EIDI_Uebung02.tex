@@ -1,0 +1,213 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+% This is a simple template for a LaTeX document using the "article" class.
+% See "book", "report", "letter" for other types of document.
+
+\documentclass[11pt]{exam} % use larger type; default would be 10pt
+
+\usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
+
+%%% Examples of Article customizations
+% These packages are optional, depending whether you want the features they provide.
+% See the LaTeX Companion or other references for full information.
+
+%%% PAGE DIMENSIONS
+\usepackage{geometry} % to change the page dimensions
+\geometry{a4paper} % or letterpaper (US) or a5paper or....
+\geometry{margin=1in} % for example, change the margins to 2 inches all round
+% \geometry{landscape} % set up the page for landscape
+%   read geometry.pdf for detailed page layout information
+
+\usepackage{graphicx} % support the \includegraphics command and options
+
+\usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+
+%%% PACKAGES
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
+\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+% These packages are all incorporated in the memoir class to one degree or another...
+
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{color}
+
+\usepackage{amssymb}
+\usepackage{textcomp}
+
+\usepackage{minted}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+%%% SECTION TITLE APPEARANCE
+\usepackage{sectsty}
+\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
+% (This matches ConTeXt defaults)
+
+%%% ToC (table of contents) APPEARANCE
+\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
+\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
+\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
+\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
+
+%%% END Article customizations
+
+%%% The "real" document content comes below...
+\title{Übungsaufgaben EIDI 2 \\ \small \color{magenta}Version 0.1.0}
+\author{Christian Femers}
+%\date{} % Activate to display a given date or no date (if empty),
+         % otherwise the current date is printed 
+
+
+\definecolor{jcom}{rgb}{0.5,0.3,0.3} 
+\definecolor{jnum}{rgb}{0.3,0.3,0.9}
+\definecolor{jstring}{rgb}{0.1,0.5,0.2}
+\definecolor{jkeyw}{rgb}{0.7,0,0.3}
+
+\lstdefinestyle{mystyle}{
+    commentstyle=\color{jcom},
+    keywordstyle=\color{jkeyw},
+    numberstyle=\tiny\color{jnum},
+    stringstyle=\color{jstring},
+    basicstyle=\ttfamily\small,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=8pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+	frame=single
+}
+\lstset{style=mystyle}
+
+\newcommand{\code}[1]{\mintinline{Java}|#1|}
+
+\usepackage[german]{babel}
+\usepackage{csquotes}
+
+\pointsinrightmargin
+\bracketedpoints
+\pointpoints{Pinguin}{Pinguine}
+\checkboxchar{$\square$}
+
+\begin{document}
+\maketitle
+
+\begin{questions}
+\question Was sind \textbf{keine} Java-Schlüsselwörter?
+\begin{checkboxes}
+\choice \texttt{final}
+\CorrectChoice \texttt{const}
+\CorrectChoice \texttt{var}
+\choice \texttt{short}
+\CorrectChoice \texttt{\_}
+\choice \texttt{case}
+\choice \texttt{class}
+\CorrectChoice \texttt{main}
+\choice \texttt{static}
+\choice \texttt{thow}
+\choice \texttt{throws}
+\CorrectChoice \texttt{null}
+\end{checkboxes}
+\question Zu was evaluieren die folgenden Java-Ausdrücke? 
+\begin{parts}
+\part \code{3 - 0}: \hrulefill % 3
+\part \code{-7 / 2}: \hrulefill % -3
+\part \code{-7 / 2.0}: \hrulefill % -3.5
+\part \code{-7d / 2}: \hrulefill % -3.5
+\part \code{true ? 3 : 2 + 1}: \hrulefill % 1
+\part \code{0.25 * 8}: \hrulefill % 2.0
+\part \code{42 * 2 + "Niugnip" + 42 + 2}: \hrulefill % 84Niugnip422
+\part \code{(long) 1.0 + "java" + 1}: \hrulefill % 1java1
+\part \code{4 + ~-1 >= 5 ? 2 * 0 : 3 / 2 + 2}: \hrulefill % 3
+\part \code{'a' + 25 - 'z'}: \hrulefill % 0
+\part \code{(8745 / 61) + (83 / 0)}: \hrulefill % java.lang.ArithmeticException: / by zero
+\part \code{0 / 1 == 0 ? null : "hallo"}: \hrulefill % null
+\part \code{(byte) 127 + 1}: \hrulefill % 128
+\end{parts}
+\question Betrachten Sie den folgenden Code-Auszug:
+\begin{minted}[frame=single,tabsize=4,linenos]{Java}
+Integer input = getUserInput();
+
+if (input == (Integer) 42)
+	System.out.println("Antwort gefunden");
+else
+	System.out.println("Weitersuchen");
+	
+if ("83".equals("" + (int) input))
+	System.out.println("83 gefunden");
+\end{minted}
+Welche der folgenden Aussagen treffen zu? Nehmen Sie an, dass der Code kompiliert und betrachten sie ihn als Algorithmus. Gehen Sie nur von dem aus, was sie sehen können. 
+\begin{checkboxes}
+\choice In Zeile 3 wird der Wert von \texttt{input} mit \texttt{42} verglichen.
+\CorrectChoice In Zeile 3 werden Objekte auf Referenzgleichheit geprüft
+\CorrectChoice \texttt{Antwort gefunden} wird möglicherweise für eine Eingabe von \texttt{42} ausgegeben.
+\choice Für die Eingabe 42 wird nie \texttt{Antwort gefunden} ausgegeben werden.
+\CorrectChoice Möglicherweise \texttt{Weitersuchen} für eine Eingabe von \texttt{42} ausgegeben.
+\choice Möglicherweise wird \texttt{Antwort gefunden} und \texttt{Weitersuchen} für eine Eingabe von \texttt{42} ausgegeben.
+\CorrectChoice Bei der Eingabe von \texttt{83} wird immer \texttt{Weitersuchen} und \texttt{83 gefunden} ausgegeben.
+\choice \texttt{83 gefunden} wird nie ausgegeben werden.
+\choice In Zeile 8 wird auf Referenzgleichheit geprüft.
+\CorrectChoice In Zeile 8 werden zwei Strings zeichenweise miteinander verglichen.
+\CorrectChoice Möglicherweise \texttt{Weitersuchen} für eine Eingabe von \texttt{42} ausgegeben.
+\choice Bei Zeile 3 wird nie eine \texttt{NullPointerException} geworfen werden.
+\CorrectChoice Bei Zeile 8 wirft \texttt{equals} eine \texttt{IllegalArgumentException}.
+\CorrectChoice Zeile 8 wirft möglicherweise eine \texttt{NullPointerException}.
+\choice Die Ausgabe ist nicht deterministisch.
+\CorrectChoice Möglicherweise wird gar nichts in die Konsole ausgegeben.
+\end{checkboxes}
+\question Zu welchem Wert evaluieren die folgenden Ausdrücke, vorausgesetzt die \code{int}-Variable \texttt{x} hat vor jeder Teilaufgabe den Wert 0?
+\begin{parts}
+\part \code{x++}: \hrulefill % 0
+\part \code{x = x = x++}: \hrulefill % 0
+\part \code{x++ + ++x}: \hrulefill % 2
+\part \code{--x != ++x}: \hrulefill % true
+\part \code{--x - --x - x}: \hrulefill % 3
+\part \code{x++ == x++ ? x-- - 1 : --x + 1}: \hrulefill % 2
+\part \code{x++ * x++ * x++}: \hrulefill % 0
+\end{parts}
+\question Was sind erlaubte Bezeichner für Variablen in Java (ab Version 9)?
+\begin{checkboxes}
+\choice \texttt{fin al}
+\CorrectChoice \texttt{const}
+\CorrectChoice \texttt{var}
+\CorrectChoice \texttt{µPC}
+\CorrectChoice \texttt{\$name}
+\choice \texttt{\_}
+\CorrectChoice \texttt{\_\_}
+\choice \texttt{public}
+\CorrectChoice \texttt{CLASS}
+\choice \texttt{42sinn}
+\CorrectChoice \texttt{main}
+\CorrectChoice \texttt{\_mäin\_}
+\choice \texttt{pingu!n}
+\choice \texttt{null}
+\end{checkboxes}
+\question Erstellen sie das Kontrollflussdiagramm zu folgendem Java-Code-Auszug. Die Methode \code{read()} gibt dabei einen \code{int} zurück, \code{write(int)} gibt den übergebenen \code{int}-Wert auf der Konsole aus.
+\begin{minted}[frame=single,tabsize=4,linenos]{Java}
+final int a = read();
+int b = a;
+OUTER: for(int i = 0; i < 5; i++) {
+	switch(b) {
+		case 1:
+		case 2: b++; continue;
+		case 5:
+		case 4: b--; break;
+		case 3: break OUTER;
+	}
+	write(b);
+}
+write(b);
+\end{minted}
+
+\end{questions}
+
+\end{document}
