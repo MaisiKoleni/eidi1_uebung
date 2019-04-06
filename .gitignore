@@ -1,1 +1,7 @@
 /bin/
+/src/ueb_blatt_2/pdf_und_latex/_minted-EIDI_Uebung02/
+
+*.log
+*.out
+*.gz
+*.aux

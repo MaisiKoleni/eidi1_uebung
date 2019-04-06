@@ -36,6 +36,7 @@
 \usepackage{xcolor}
 \usepackage{color}
 
+\usepackage{xhfill}
 \usepackage{amssymb}
 \usepackage{textcomp}
 
@@ -89,6 +90,10 @@
 \lstset{style=mystyle}
 
 \newcommand{\code}[1]{\mintinline{Java}|#1|}
+\newcommand{\fillinline}[1]{\fillin[\code{#1}][3cm]\xrfill[-1pt]{0.2mm}}
+\newcommand{\fillinlinexl}[1]{\fillin[\code{#1}][9cm]\xrfill[-1pt]{0.2mm}}
+
+\renewcommand{\solutiontitle}{\noindent\textbf{Lösung:}\enspace}
 
 \usepackage[german]{babel}
 \usepackage{csquotes}
@@ -97,6 +102,7 @@
 \bracketedpoints
 \pointpoints{Pinguin}{Pinguine}
 \checkboxchar{$\square$}
+\checkedchar{$\blacksquare$}
 
 \begin{document}
 \maketitle
@@ -108,7 +114,7 @@
 \CorrectChoice \texttt{const}
 \CorrectChoice \texttt{var}
 \choice \texttt{short}
-\CorrectChoice \texttt{\_}
+\CorrectChoice \texttt{false}
 \choice \texttt{case}
 \choice \texttt{class}
 \CorrectChoice \texttt{main}
@@ -119,19 +125,19 @@
 \end{checkboxes}
 \question Zu was evaluieren die folgenden Java-Ausdrücke? 
 \begin{parts}
-\part \code{3 - 0}: \hrulefill % 3
-\part \code{-7 / 2}: \hrulefill % -3
-\part \code{-7 / 2.0}: \hrulefill % -3.5
-\part \code{-7d / 2}: \hrulefill % -3.5
-\part \code{true ? 3 : 2 + 1}: \hrulefill % 1
-\part \code{0.25 * 8}: \hrulefill % 2.0
-\part \code{42 * 2 + "Niugnip" + 42 + 2}: \hrulefill % 84Niugnip422
-\part \code{(long) 1.0 + "java" + 1}: \hrulefill % 1java1
-\part \code{4 + ~-1 >= 5 ? 2 * 0 : 3 / 2 + 2}: \hrulefill % 3
-\part \code{'a' + 25 - 'z'}: \hrulefill % 0
-\part \code{(8745 / 61) + (83 / 0)}: \hrulefill % java.lang.ArithmeticException: / by zero
-\part \code{0 / 1 == 0 ? null : "hallo"}: \hrulefill % null
-\part \code{(byte) 127 + 1}: \hrulefill % 128
+\part \code{3 - 0}:\fillinline{3}
+\part \code{-7 / 2}: \fillinline{-3}
+\part \code{-7 / 2.0}: \fillinline{-3.5}
+\part \code{-7d / 2}: \fillinline{-3.5}
+\part \code{true ? 3 : 2 + 1}: \fillinline{1}
+\part \code{0.25 * 8}: \fillinline{2.0}
+\part \code{42 * 2 + "Niugnip" + 42 + 2}: \fillinline{84Niugnip422}
+\part \code{(long) 1.0 + "java" + 1}: \fillinline{1java1}
+\part \code{4 + ~-1 >= 5 ? 2 * 0 : 3 / 2 + 2}: \fillinline{3}
+\part \code{'a' + 25 - 'z'}: \fillinline{0}
+\part \code{(8745 / 61) + (83 / 0)}: \fillinlinexl{java.lang.ArithmeticException: / by zero}
+\part \code{0 / 1 == 0 ? null : "hallo"}: \fillinline{null}
+\part \code{(byte) 127 + 1}: \fillinline{128}
 \end{parts}
 \question Betrachten Sie den folgenden Code-Auszug:
 \begin{minted}[frame=single,tabsize=4,linenos]{Java}
@@ -151,7 +157,7 @@ Welche der folgenden Aussagen treffen zu? Nehmen Sie an, dass der Code kompilier
 \CorrectChoice In Zeile 3 werden Objekte auf Referenzgleichheit geprüft
 \CorrectChoice \texttt{Antwort gefunden} wird möglicherweise für eine Eingabe von \texttt{42} ausgegeben.
 \choice Für die Eingabe 42 wird nie \texttt{Antwort gefunden} ausgegeben werden.
-\CorrectChoice Möglicherweise \texttt{Weitersuchen} für eine Eingabe von \texttt{42} ausgegeben.
+\CorrectChoice Möglicherweise wird \texttt{Weitersuchen} für eine Eingabe von \texttt{42} ausgegeben.
 \choice Möglicherweise wird \texttt{Antwort gefunden} und \texttt{Weitersuchen} für eine Eingabe von \texttt{42} ausgegeben.
 \CorrectChoice Bei der Eingabe von \texttt{83} wird immer \texttt{Weitersuchen} und \texttt{83 gefunden} ausgegeben.
 \choice \texttt{83 gefunden} wird nie ausgegeben werden.
@@ -159,24 +165,24 @@ Welche der folgenden Aussagen treffen zu? Nehmen Sie an, dass der Code kompilier
 \CorrectChoice In Zeile 8 werden zwei Strings zeichenweise miteinander verglichen.
 \CorrectChoice Möglicherweise \texttt{Weitersuchen} für eine Eingabe von \texttt{42} ausgegeben.
 \choice Bei Zeile 3 wird nie eine \texttt{NullPointerException} geworfen werden.
-\CorrectChoice Bei Zeile 8 wirft \texttt{equals} eine \texttt{IllegalArgumentException}.
+\choice Bei Zeile 8 wirft \texttt{equals} eine \texttt{IllegalArgumentException}.
 \CorrectChoice Zeile 8 wirft möglicherweise eine \texttt{NullPointerException}.
 \choice Die Ausgabe ist nicht deterministisch.
 \CorrectChoice Möglicherweise wird gar nichts in die Konsole ausgegeben.
 \end{checkboxes}
 \question Zu welchem Wert evaluieren die folgenden Ausdrücke, vorausgesetzt die \code{int}-Variable \texttt{x} hat vor jeder Teilaufgabe den Wert 0?
 \begin{parts}
-\part \code{x++}: \hrulefill % 0
-\part \code{x = x = x++}: \hrulefill % 0
-\part \code{x++ + ++x}: \hrulefill % 2
-\part \code{--x != ++x}: \hrulefill % true
-\part \code{--x - --x - x}: \hrulefill % 3
-\part \code{x++ == x++ ? x-- - 1 : --x + 1}: \hrulefill % 2
-\part \code{x++ * x++ * x++}: \hrulefill % 0
+\part \code{x++}: \fillinline{0}
+\part \code{x = x = x++}: \fillinline{0}
+\part \code{x++ + ++x}: \fillinline{2}
+\part \code{--x != ++x}: \fillinline{true}
+\part \code{--x - --x - x}: \fillinline{3}
+\part \code{x++ == x++ ? x-- - 1 : --x + 1}: \fillinline{2}
+\part \code{x++ * x++ * x++}: \fillinline{0}
 \end{parts}
 \question Was sind erlaubte Bezeichner für Variablen in Java (ab Version 9)?
 \begin{checkboxes}
-\choice \texttt{fin al}
+\choice \texttt{ein name}
 \CorrectChoice \texttt{const}
 \CorrectChoice \texttt{var}
 \CorrectChoice \texttt{µPC}
@@ -207,6 +213,9 @@ OUTER: for(int i = 0; i < 5; i++) {
 }
 write(b);
 \end{minted}
+\begin{solution}
+\includegraphics[width=12cm]{kontrollfluss.pdf}
+\end{solution}
 
 \end{questions}
 
