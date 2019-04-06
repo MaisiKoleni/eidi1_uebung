@@ -90,8 +90,8 @@
 \lstset{style=mystyle}
 
 \newcommand{\code}[1]{\mintinline{Java}|#1|}
-\newcommand{\fillinline}[1]{\fillin[\code{#1}][3cm]\xrfill[-1pt]{0.2mm}}
-\newcommand{\fillinlinexl}[1]{\fillin[\code{#1}][9cm]\xrfill[-1pt]{0.2mm}}
+\newcommand{\fillinline}[1]{\ifprintanswers\fillin[\code{#1}][3cm]\fi\xrfill[-1pt]{0.2mm}}
+\newcommand{\fillinlinexl}[1]{\ifprintanswers\fillin[\code{#1}][9cm]\fi\xrfill[-1pt]{0.2mm}}
 
 \renewcommand{\solutiontitle}{\noindent\textbf{Lösung:}\enspace}
 
@@ -106,6 +106,8 @@
 
 \begin{document}
 \maketitle
+
+%\printanswers
 
 \begin{questions}
 \question Was sind \textbf{keine} Java-Schlüsselwörter?
