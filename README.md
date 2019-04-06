@@ -10,10 +10,13 @@ Java 11 empfohlen.
 Fragen besser nicht hier, sondern im Piazza-Post. Issues nur für die Fehler von Tests, Lösung und PDF verwenden.
 
 ## 1. Synchrone Rekursion
-Die eigene  Lösung kommt in das src package, die Musterlösung ist unter "loesung" zu finden. 
+Die eigene Lösung kommt in das src package, die Musterlösung ist unter "loesung" zu finden. 
 Um die Musterlösung zu nutzen, diese einfach nach src verschieben (am besten ohne alle Referenzen zu aktualisieren).
 Aus den genannen Gründen *kompiliert der Code nicht auf anhieb*.
 
 Bitte beachtet, dass die Aufgabe nicht wirklich für die Bearbeitung innerhalb der IDE und damit auch für das Testen des Codes konzipiert war, sie lässt etwas zu viele Freihheiten gerade bei der Benennung der Methoden. Es muss also ggf. Code, der für sich richtig ist, etwas angepasst werden.
 
 Zum Testen die Klasse ["TestSynchroneRekursion"](ueb_blatt_1/tests/TestSynchroneRekursion.java) ausführen.
+
+## 2. Kausurähnliche Aufgaben
+Den Aufgabentypen die in der EIDI-Kausur vorkommen nachempfunden. Ein Stück ausführlicher und schwerer als die Orginale (zur Übung).
