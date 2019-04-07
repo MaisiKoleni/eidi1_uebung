@@ -58,7 +58,7 @@
 %%% END Article customizations
 
 %%% The "real" document content comes below...
-\title{Übungsaufgaben EIDI 2 \\ \small \color{magenta}Version 0.1.2}
+\title{Übungsaufgaben EIDI 2 \\ \small \color{magenta}Version 1.0.0}
 \author{Christian Femers}
 %\date{} % Activate to display a given date or no date (if empty),
          % otherwise the current date is printed 
@@ -69,6 +69,12 @@
 \newcommand{\fillinlinexl}[1]{\ifprintanswers\fillin[\code{#1}][9cm]\fi\xrfill[-1pt]{0.2mm}}
 
 \renewcommand{\solutiontitle}{\noindent\textbf{Lösung:}\enspace}
+
+\setminted{
+    linenos=true,
+    frame=single,
+    tabsize=4,
+}
 
 \usepackage[german]{babel}
 \usepackage{csquotes}
@@ -82,7 +88,12 @@
 \begin{document}
 \maketitle
 
-%\printanswers
+%\printanswers % ANSWERS
+
+\ifprintanswers
+\begin{framed}{\vspace{8.5cm}\begin{center}\color{red}\textbf{ACHTUNG: LÖSUNGEN}\end{center}\vspace{8.75cm}}\end{framed}
+\newpage
+\fi
 
 \begin{questions}
 \question Was sind \textbf{keine} Java-Schlüsselwörter?
@@ -100,6 +111,7 @@
 \choice \texttt{throws}
 \CorrectChoice \texttt{null}
 \end{checkboxes}
+\filbreak
 \question Zu was evaluieren die folgenden Java-Ausdrücke? 
 \begin{parts}
 \part \code{3 - 0}:\fillinline{3}
@@ -116,8 +128,9 @@
 \part \code{0 / 1 == 0 ? null : "hallo"}: \fillinline{null}
 \part \code{(byte) 127 + 1}: \fillinline{128}
 \end{parts}
+\filbreak
 \question Betrachten Sie den folgenden Code-Auszug:
-\begin{minted}[frame=single,tabsize=4,linenos]{Java}
+\begin{minted}{Java}
 Integer input = getUserInput();
 
 if (input == (Integer) 42)
@@ -157,6 +170,7 @@ Welche der folgenden Aussagen treffen zu? Nehmen Sie an, dass der Code kompilier
 \part \code{x++ == x++ ? x-- - 1 : --x + 1}: \fillinline{2}
 \part \code{x++ * x++ * x++}: \fillinline{0}
 \end{parts}
+\filbreak
 \question Was sind erlaubte Bezeichner für Variablen in Java (ab Version 9)?
 \begin{checkboxes}
 \choice \texttt{ein name}
@@ -174,8 +188,9 @@ Welche der folgenden Aussagen treffen zu? Nehmen Sie an, dass der Code kompilier
 \choice \texttt{pingu!n}
 \choice \texttt{null}
 \end{checkboxes}
+\filbreak
 \question Erstellen sie das Kontrollflussdiagramm zu folgendem Java-Code-Auszug. Die Methode \code{read()} gibt dabei einen \code{int} zurück, \code{write(int)} gibt den übergebenen \code{int}-Wert auf der Konsole aus.
-\begin{minted}[frame=single,tabsize=4,linenos]{Java}
+\begin{minted}{Java}
 final int a = read();
 int b = a;
 OUTER: for(int i = 0; i < 5; i++) {
@@ -190,8 +205,8 @@ OUTER: for(int i = 0; i < 5; i++) {
 }
 write(b);
 \end{minted}
-\begin{solution}
-\includegraphics[width=12cm]{kontrollfluss.pdf}
+\begin{solution}\par\nobreak
+\includegraphics[width=\linewidth]{kontrollfluss.pdf}
 \end{solution}
 
 \end{questions}
