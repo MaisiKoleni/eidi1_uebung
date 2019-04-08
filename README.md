@@ -22,7 +22,7 @@ Zum Testen die Klasse ["TestSynchroneRekursion"](src/ueb_blatt_1/tests/TestSynch
 
 ## 2. Kausurähnliche Aufgaben
 Den Aufgabentypen die in der EIDI-Kausur vorkommen nachempfunden. Ein Stück ausführlicher und schwerer als die Orginale (zur Übung). Hier gibt es Multiple Choice, Java-Syntax, Auswertung und Verhalten, Kontrollflussdiagramme.
-#### [Aufgabenblatt](src/master/ueb_blatt_2/pdf_und_latex/EIDI_Uebung02.pdf) \[[LÖSUNG](src/ueb_blatt_2/pdf_und_latex/EIDI_Uebung02_lsg.pdf)\]
+#### [Aufgabenblatt](src/ueb_blatt_2/pdf_und_latex/EIDI_Uebung02.pdf) \[[LÖSUNG](src/ueb_blatt_2/pdf_und_latex/EIDI_Uebung02_lsg.pdf)\]
 
 ## 3. Weitere kausurähnliche Aufgaben von Johannes Stöhr
 Den Aufgabentypen die in der EIDI-Kausur vorkommen nachempfunden. Ein Stück ausführlicher und schwerer als die Orginale (zur Übung). Hier gibt es einen Syntaxbaum, Lückentext, viel Polymorphie, eine nebenläufige Graphentraversierungsaufgabe. Die letzten beiden sind auch im src Ordner zu finden.
