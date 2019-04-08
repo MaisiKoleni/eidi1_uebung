@@ -1,5 +1,5 @@
 /bin/
-/src/ueb_blatt_?/pdf_und_latex/_minted-EIDI_Uebung??/
+/src/ueb_blatt_?/pdf_und_latex/*/
 
 *.log
 *.out

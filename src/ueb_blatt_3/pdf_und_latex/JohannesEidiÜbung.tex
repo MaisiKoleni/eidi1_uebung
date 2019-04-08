@@ -58,7 +58,7 @@
 %%% END Article customizations
 
 %%% The "real" document content comes below...
-\title{Übungen zu EIDI \\ \small \color{blue}Version 1.0.0}
+\title{Übungen zu EIDI \\ \small \color{blue}Version 1.1.0}
 \author{Johannes Stöhr}
 %\date{} % Activate to display a given date or no date (if empty),
          % otherwise the current date is printed 
@@ -85,7 +85,7 @@
 \begin{document}
 \maketitle
 
-%\printanswers
+%\printanswers % ANSWERS
 
 \ifprintanswers
 \begin{framed}{\vspace{8.5cm}\begin{center}\color{red}\textbf{ACHTUNG: LÖSUNGEN}\end{center}\vspace{8.75cm}}\end{framed}
@@ -113,11 +113,14 @@ while(a > 0) {
 	}
 }
 \end{minted}
+\begin{solution}\par\nobreak
+\includegraphics[width=\linewidth]{syntaxbaum.pdf}
+\end{solution}
 \end{minipage}
 \part Würde dieses Programm \ifprintanswers auf {\color{red}hier fehlt noch was} \fi kompilieren? Warum (nicht)?\par
 \nobreak
 \begin{solutionordottedlines}[4cm]
-Kompiliert, weil es einen gültigen Syntaxbaum gibt und auch der Kontext der Grammatik stimmt, d.h. bei Mini-Java: alle Variablen wurden vorher deklariert. Eine Typprüfung nimmt Mini-Java nicht vor, daher ist das Zuweisen eines \code{int}s zu einem Array wie in Zeile 9 (leider) erlaubt.
+Kompiliert, weil es einen gültigen Syntaxbaum gibt und auch der Kontext der Grammatik stimmt, d.h. bei Mini-Java: alle Variablen wurden vorher deklariert. Eine Typprüfung nimmt Mini-Java nicht vor, daher ist das Zuweisen eines \code{int}s zu einem Array wie in Zeile 9 (leider) erlaubt. Die Begründung, dass ein anständiger Compiler so eine Zuweisung nie erlauben dürfte, wäre jedoch auch richtig.
 \end{solutionordottedlines}
 \end{parts}
 \newpage
@@ -127,7 +130,7 @@ Kompiliert, weil es einen gültigen Syntaxbaum gibt und auch der Kontext der Gra
 public class Randomsort {
 	public static void sort(int[] array) {
 		while(!isSorted(array)) {
-			int index = (|\fillin[int][1cm]|) (Math.random() * (|\fillin[array.length][3cm]|)) + |\fillin[0][0.7cm]|;
+			int index = (|\fillin[int][1cm]|) (Math.random() * (|\fillin[array.length - 1][3.2cm]|)) + |\fillin[1][0.5cm]|;
 			// 0.0 <= Math.random() < 1.0
 			int remember = |\fillin[array{[index]}][5cm]|;
 			array[|\fillin[index][3cm]|] = array[0];
@@ -310,7 +313,7 @@ Jedoch müssen die Grenzen der Paralleluniversen gewahrt werden, daher dürfen z
 Pingu nicht am selben Beacon existieren, da sonst die beiden Realitäten kollidieren und alles
 auseinandergerissen wird.\par
 Damit Pingu nicht im Kreis fliegt, sollte sich jede Kopie von ihm merken, wo diese schonmal war.
-Wird Pingu kopiert, wissen beide Kopien, welche Punkte der bisherige Weg beinhaltet hat.
+Wird Pingu kopiert weiß die neue Kopie nichts vom bisherigen Weg. Nur für die Bonusaufgabe darf der bisherige Weg übergeben werden.
 Sollte Pingu in einer Sackgasse landen, darf er einen Schritt zurückgehen und von dort einen
 anderen Weg wählen. Sollten alle Wege von einem Punkt nicht zum Ziel führen, darf er noch einen
 Schritt weiter zurückgehen und so weiter.\par
@@ -318,11 +321,10 @@ Sobald eine Kopie von Pingu das Ziel erreicht hat, können alle Pingus aufhören
 zu suchen, da die Sternenflotte ein spezielles Funkgerät besitzt, mit dem sie auch mit
 Paralleluniversen kommunizieren kann. Daher sind dann automatisch alle Pingukopien gerettet.\par
 Erweitern sie hierzu die Implementierung der Klasse \code{PenguinAstronaut}.\par
-\emph{Bonus: Pingu schildert auf dem Flottenstützpunkt seinen gefährlichen Weg durch das Universum.}\par
+\emph{Bonus: Ein Erzähler schildert nach Pingus Ankunft die aufregende Reise durch das Weltall.}\par
 \begin{minipage}{\linewidth}
 \begin{minted}{Java}
-public class Space
-{
+public class Space {
 	// 0 = keine Verbindung; 1 = Verbindung; 2 = Wurmloch
 	private int[][] adjacencyMatrix; 
 
@@ -350,8 +352,143 @@ public class PenguinAstronaut extends Thread {
 }
 \end{minted}
 \end{minipage}
-\begin{solution}
-Unbekannt.
-\end{solution}
+\ifprintanswers
+\filbreak
+\textbf{Mögliche Lösung:}\par\nobreak
+\begin{minted}[breaklines,breakindent=20pt]{Java}
+import java.util.ArrayList;
+import java.util.List;
+
+public class PenguinAstronaut extends Thread {
+	private static Object[] locks;
+
+	private static synchronized void initLocks(int size) {
+		// Initialise lock objects only once
+		if (locks == null) {
+			locks = new Object[size];
+			for (int i = 0; i < locks.length; i++) {
+				locks[i] = new Object();
+			}
+		}
+	}
+
+	private Space space;
+	private int sizeOfSpace;
+	private int start;
+	private int to;
+	private boolean[] visited;
+
+	// For stopping all Threads at the end
+	private PenguinAstronaut parentThread;
+	private List<PenguinAstronaut> childThreads;
+
+	// For telling the way afterward
+	private List<Integer> visitedLocations;
+
+	// Standard constructor for first Pingu
+	public PenguinAstronaut(Space space, int start, int to) {
+		this(space, start, to, null, new ArrayList<>());
+	}
+
+	// Constructor for every other Pingu
+	public PenguinAstronaut(Space space, int start, int to, PenguinAstronaut parentThread, List<Integer> visitedLocs) {
+		this.space = space;
+		sizeOfSpace = space.getAdjacencyMatrix().length;
+		this.start = start;
+		this.to = to;
+		visited = new boolean[sizeOfSpace];
+
+		this.parentThread = parentThread;
+		childThreads = new ArrayList<>();
+
+		this.visitedLocations = visitedLocs;
+
+		initLocks(sizeOfSpace);
+	}
+
+	@Override
+	public void run() {
+		visit(start);
+	}
+
+	private void visit(int index) {
+		// Way was already found
+		if (this.isInterrupted())
+			return;
+
+		// Needs to be declared before synchronized
+		int nextVisit = 0;
+		// Lock current location
+		synchronized (locks[index]) {
+			// Found location of starfleet
+			if (index == to) {
+				tellStory();
+				stopSearching(this);
+				return;
+			}
+			visitedLocations.add(index);
+			visited[index] = true;
+
+			/*
+			 * New Pingus through wormholes 
+			 * 
+			 * matrix[index][i] = 1 means there is a way from
+			 * the current location to the beacon with the index i
+			 */
+			for (int i = 0; i < sizeOfSpace; i++) {
+				if (space.getAdjacencyMatrix()[index][i] == 2 && !visited[i]) {
+					PenguinAstronaut p = new PenguinAstronaut(space, i, to, this, new ArrayList<>(visitedLocations));
+					childThreads.add(p);
+					p.start();
+				}
+			}
+			// Visit next beacons
+			nextVisit = nextVisit(nextVisit, index);
+		}
+
+		while (nextVisit != -1) {
+			visit(nextVisit);
+			// We're back from a dead end
+			synchronized (locks[index]) {
+				visitedLocations.remove(visitedLocations.size() - 1);
+				// Determine if and where to go next
+				nextVisit = nextVisit(nextVisit + 1, index);
+				// Possibly going back one step, unlock current beacon
+			}
+		}
+	}
+
+	private int nextVisit(int seachStart, int index) {
+		// Looking for the next Place to visit
+		for (int i = seachStart; i < sizeOfSpace; i++) {
+			if (space.getAdjacencyMatrix()[index][i] == 1 && !visited[i])
+				return i;
+		}
+		return -1;
+	}
+
+	private void stopSearching(PenguinAstronaut stopping) {
+		// Stop parent if it's not the one stopping
+		if (parentThread != null && parentThread != stopping) {
+			parentThread.stopSearching(this);
+		}
+		// Stop every child that is not the one stopping
+		for (PenguinAstronaut p : childThreads) {
+			if (p != stopping) {
+				p.stopSearching(this);
+			}
+		}
+		// Interrupt this Pingu's search
+		this.interrupt();
+	}
+
+	private void tellStory() {
+		for (Integer i : visitedLocations) {
+			System.out.println("I was at beacon " + i);
+		}
+	}
+}
+\end{minted}
+\fi
 \end{questions}
 \end{document}
