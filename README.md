@@ -16,14 +16,14 @@ Aus den genannen Gründen *kompiliert der Code nicht auf anhieb*.
 
 Bitte beachtet, dass die Aufgabe nicht wirklich für die Bearbeitung innerhalb der IDE und damit auch für das Testen des Codes konzipiert war, sie lässt etwas zu viele Freihheiten gerade bei der Benennung der Methoden. Es muss also ggf. Code, der für sich richtig ist, etwas angepasst werden.
 
-#### [Aufgabenblatt](ueb_blatt_1/pdf_und_latex/EIDI_Uebung01.pdf)
+#### [Aufgabenblatt](../../blob/master/ueb_blatt_1/pdf_und_latex/EIDI_Uebung01.pdf)
 
-Zum Testen die Klasse ["TestSynchroneRekursion"](ueb_blatt_1/tests/TestSynchroneRekursion.java) ausführen.
+Zum Testen die Klasse ["TestSynchroneRekursion"](../../blob/master/ueb_blatt_1/tests/TestSynchroneRekursion.java) ausführen.
 
 ## 2. Kausurähnliche Aufgaben
 Den Aufgabentypen die in der EIDI-Kausur vorkommen nachempfunden. Ein Stück ausführlicher und schwerer als die Orginale (zur Übung). Hier gibt es Multiple Choice, Java-Syntax, Auswertung und Verhalten, Kontrollflussdiagramme.
-#### [Aufgabenblatt](ueb_blatt_2/pdf_und_latex/EIDI_Uebung02.pdf) \[[LÖSUNG](ueb_blatt_2/pdf_und_latex/EIDI_Uebung02_lsg.pdf)\]
+#### [Aufgabenblatt](../../blob/master/ueb_blatt_2/pdf_und_latex/EIDI_Uebung02.pdf) \[[LÖSUNG](../../blob/master/ueb_blatt_2/pdf_und_latex/EIDI_Uebung02_lsg.pdf)\]
 
 ## 3. Weitere kausurähnliche Aufgaben von Johannes Stöhr
 Den Aufgabentypen die in der EIDI-Kausur vorkommen nachempfunden. Ein Stück ausführlicher und schwerer als die Orginale (zur Übung). Hier gibt es einen Syntaxbaum, Lückentext, viel Polymorphie, eine nebenläufige Graphentraversierungsaufgabe. Die letzten beiden sind auch im src Ordner zu finden.
-#### [Aufgabenblatt](ueb_blatt_3/pdf_und_latex/JohannesEidiÜbung.pdf) \[[LÖSUNG](ueb_blatt_3/pdf_und_latex/JohannesEidiÜbung_lsg.pdf)\]
+#### [Aufgabenblatt](../../blob/master/ueb_blatt_3/pdf_und_latex/JohannesEidiÜbung.pdf) \[[LÖSUNG](../../blob/master/ueb_blatt_3/pdf_und_latex/JohannesEidiÜbung_lsg.pdf)\]
