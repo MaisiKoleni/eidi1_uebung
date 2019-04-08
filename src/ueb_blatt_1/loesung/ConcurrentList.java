@@ -148,10 +148,10 @@ public final class ConcurrentList<S, T> implements List<S, T> {
 	@Override
 	public void doSelectionSort(Comparator<ListElement<S, T>> comp) {
 		Objects.requireNonNull(comp, "Comparator must not be null");
-		if (first == null || first.getNext() == null)
-			return;
 		lock.writeLock().lock();
 		try {
+			if (first == null || first.getNext() == null)
+				return;
 			doSelectionSortRecursive(first, 0, comp);
 		} finally {
 			lock.writeLock().unlock();
