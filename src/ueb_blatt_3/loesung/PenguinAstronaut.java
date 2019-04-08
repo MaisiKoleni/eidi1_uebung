@@ -1,4 +1,4 @@
-package ueb_blatt_3.src;
+package ueb_blatt_3.loesung;
 
 import java.util.ArrayList;
 import java.util.List;

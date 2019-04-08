@@ -1,4 +1,4 @@
-package ueb_blatt_3.src;
+package ueb_blatt_3.loesung;
 
 public class Space {
 	// 0 = keine Verbindung; 1 = Verbindung; 2 = Wurmloch
