@@ -58,7 +58,7 @@
 %%% END Article customizations
 
 %%% The "real" document content comes below...
-\title{Übungen zu EIDI \\ \small \color{blue}Version 1.1.0}
+\title{Übungen zu EIDI \\ \small \color{blue}Version 1.1.1}
 \author{Johannes Stöhr}
 %\date{} % Activate to display a given date or no date (if empty),
          % otherwise the current date is printed 
@@ -117,7 +117,7 @@ while(a > 0) {
 \includegraphics[width=\linewidth]{syntaxbaum.pdf}
 \end{solution}
 \end{minipage}
-\part Würde dieses Programm \ifprintanswers auf {\color{red}hier fehlt noch was} \fi kompilieren? Warum (nicht)?\par
+\part Würde dieses Programm kompilieren? Warum (nicht)?\par
 \nobreak
 \begin{solutionordottedlines}[4cm]
 Kompiliert, weil es einen gültigen Syntaxbaum gibt und auch der Kontext der Grammatik stimmt, d.h. bei Mini-Java: alle Variablen wurden vorher deklariert. Eine Typprüfung nimmt Mini-Java nicht vor, daher ist das Zuweisen eines \code{int}s zu einem Array wie in Zeile 9 (leider) erlaubt. Die Begründung, dass ein anständiger Compiler so eine Zuweisung nie erlauben dürfte, wäre jedoch auch richtig.
