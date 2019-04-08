@@ -19,7 +19,7 @@ Bitte beachtet, dass die Aufgabe nicht wirklich für die Bearbeitung innerhalb d
 Zum Testen die Klasse ["TestSynchroneRekursion"](src/ueb_blatt_1/tests/TestSynchroneRekursion.java) ausführen.
 
 #### [Aufgabenblatt](src/ueb_blatt_1/pdf_und_latex/EIDI_Uebung01.pdf) \[[LÖSUNG](src/ueb_blatt_1/pdf_und_latex/EIDI_Uebung01_lsg.pdf)\]
-_Hinweis: Es gibt die Lösung auch als .java-Dateien im [`loesung`-Ordner](src/ueb_blatt_1/loesung)_
+_Hinweis: Es gibt die Lösungen auch als .java-Dateien im [`loesung`-Ordner](src/ueb_blatt_1/loesung)_
 
 ## 2. Klausur-ähnliche Aufgaben
 Den Aufgabentypen die in der EIDI-Kausur vorkommen nachempfunden. Ein Stück ausführlicher und schwerer als die Originale (zur Übung). Hier gibt es Multiple Choice, Java-Syntax, Auswertung und Verhalten, Kontrollflussdiagramme.
@@ -28,4 +28,4 @@ Den Aufgabentypen die in der EIDI-Kausur vorkommen nachempfunden. Ein Stück aus
 ## 3. Weitere Klausur-ähnliche Aufgaben von Johannes Stöhr
 Den Aufgabentypen die in der EIDI-Kausur vorkommen nachempfunden. Ein Stück ausführlicher und schwerer als die Originale (zur Übung). Hier gibt es einen Syntaxbaum, Lückentext, viel Polymorphie, eine nebenläufige Graphentraversierungsaufgabe. Die letzten beiden sind auch im src Ordner zu finden.
 #### [Aufgabenblatt](src/ueb_blatt_3/pdf_und_latex/JohannesEidiÜbung.pdf) \[[LÖSUNG](src/ueb_blatt_3/pdf_und_latex/JohannesEidiÜbung_lsg.pdf)\]
-_Hinweis: Es gibt die Lösung auch als .java-Dateien im [`loesung`-Ordner](src/ueb_blatt_3/loesung)_
+_Hinweis: Es gibt die Lösung auch als .java-Datei im [`loesung`-Ordner](src/ueb_blatt_3/loesung)_
