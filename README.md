@@ -7,7 +7,8 @@ Benötigt JUnit 4 (ist bei Eclipse vorinstalliert, Probleme sollten sich mit "fi
 
 Java 11 empfohlen.
 
-Fragen besser nicht hier, sondern im Piazza-Post. Issues nur für die Fehler von Tests, Lösung und PDF verwenden.
+Fragen besser nicht hier, sondern im Piazza-Post oder was zum heutigen Zeitpunkt für die Kommunikation verwendet wird. 
+Issues nur für die Fehler von Tests, Lösung und PDF verwenden.
 
 ## 1. Synchrone Rekursion
 Die eigene Lösung kommt in das src package, die Musterlösung ist unter "loesung" zu finden. 
